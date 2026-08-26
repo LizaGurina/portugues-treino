@@ -202,6 +202,7 @@ function renderDialogIntro(){
 }
 function renderDialogStep(){
   const d = DLG.d;
+  DLG.lastHeard = '';
   if(DLG.i >= d.steps.length) return finishDialog();
   const s = d.steps[DLG.i];
   document.getElementById('view').innerHTML = `
@@ -240,8 +241,9 @@ function renderDialogStep(){
   if(SR) mic.onclick = ()=> toggleRec(s);
   else { mic.style.opacity=.4; mic.style.cursor='default'; }
   const typed = document.getElementById('typed');
-  document.getElementById('send').onclick = ()=> judgeDialog(s, typed.value);
-  typed.onkeydown = e=>{ if(e.key==='Enter'){ e.preventDefault(); judgeDialog(s, typed.value); } };
+  const submit = ()=>{ stopRec(); judgeDialog(s, typed.value.trim() || DLG.lastHeard || ''); };
+  document.getElementById('send').onclick = submit;
+  typed.onkeydown = e=>{ if(e.key==='Enter'){ e.preventDefault(); submit(); } };
 }
 function toggleRec(s){
   if(recActive){ userStopRec(); return; }
@@ -273,7 +275,9 @@ function toggleRec(s){
       if(r.isFinal) accumulated += r[0].transcript + ' ';
       else interim += r[0].transcript + ' ';
     }
-    st.textContent = '«'+(accumulated+interim).trim()+'»';
+    const heard = (accumulated+interim).trim();
+    if(DLG) DLG.lastHeard = heard;
+    st.textContent = '«'+heard+'»';
   };
   rec.onerror = e=>{
     if(e.error==='no-speech') return;           // тишина — просто ждём дальше
@@ -316,8 +320,8 @@ function judgeDialog(s, text){
   const ok = missing.length === 0 && (grammarOk || borderline);
   DLG.tries++;
   const firstTry = !DLG.answers.some(a=>a.step===DLG.i);
-  DLG.answers.push({step:DLG.i, task:s.task, given:text, ok, model:s.model,
-                    models:s.models||[], missing, firstTry});
+  DLG.answers.push({step:DLG.i, task:s.task, given:text, ok, model:s.model, bestModel,
+                    models:s.models||[], missing, firstTry, borderline});
   const v = document.getElementById('verdict');
   const variants = m => m && m.length ?
     `<div class="ru" style="margin-top:6px">ещё можно сказать:<br>${m.map(x=>'· '+esc(x)).join('<br>')}</div>` : '';
@@ -362,30 +366,40 @@ function finishDialog(){
   const dd = today(); S.hist[dd] = S.hist[dd]||{n:0,ok:0};
   S.hist[dd].n += d.steps.length; S.hist[dd].ok += firstOk.reduce((a,b)=>a+b,0);
   save();
-  // разбор: все шаги, где первая попытка была неудачной или шаг пропущен
-  const problems = [];
+  // все реплики: что сказала, с подсветкой ошибочных мест
+  const rows = [];
   d.steps.forEach((st,i)=>{
     const tries = DLG.answers.filter(a=>a.step===i);
-    const first = tries.find(a=>a.firstTry);
-    const solved = tries.some(a=>a.ok);
-    if(!first || !first.ok || !solved){
-      problems.push({st, first, solved});
+    if(!tries.length){
+      rows.push(`<div style="margin-bottom:12px;padding-bottom:10px;border-bottom:1px solid var(--line)">
+        <div class="small muted">${esc(st.task)}</div>
+        <div class="small muted">— пропущено —</div>
+        <div style="color:var(--accent);font-weight:600">✓ ${esc(st.model)}
+          <button class="speak" data-s="${esc(st.model)}">🔊</button></div></div>`);
+      return;
     }
+    const final = tries.filter(a=>a.ok).slice(-1)[0] || tries.slice(-1)[0];
+    const dd = wordDiff(final.given, final.bestModel || st.model);
+    const attempts = tries.length>1 ? ` <span class="small muted">· с ${tries.length}-й попытки</span>` : '';
+    let firstFail = '';
+    const f0 = tries[0];
+    if(tries.length>1 && !f0.ok && f0.given){
+      const d0 = wordDiff(f0.given, f0.bestModel || st.model);
+      firstFail = `<div class="small" style="color:var(--warn)">✗ 1-я попытка: ${d0.givenHtml}</div>`;
+    }
+    const failNote = !final.ok
+      ? `<div class="small muted">${final.missing.length? 'не хватило: '+final.missing.map(esc).join(', ') : 'фраза построена неверно'}</div>` : '';
+    rows.push(`<div style="margin-bottom:12px;padding-bottom:10px;border-bottom:1px solid var(--line)">
+      <div class="small muted">${esc(st.task)}</div>
+      ${firstFail}
+      <div style="color:${final.ok?'var(--ink)':'var(--warn)'}">${final.ok?'✓':'✗'} ${dd.givenHtml}${attempts}</div>
+      ${failNote}
+      <div class="small" style="color:var(--accent)">образец: <span class="diff">${dd.targetHtml}</span>
+        <button class="speak" data-s="${esc(final.bestModel || st.model)}">🔊</button></div>
+    </div>`);
   });
   const nOk = firstOk.reduce((a,b)=>a+b,0);
-  let review = '';
-  if(problems.length){
-    review = `<div class="card"><h2>Разбор · ${problems.length} ${plural(problems.length,'реплика','реплики','реплик')}</h2>` +
-      problems.map(p=>`<div style="margin-bottom:12px;padding-bottom:10px;border-bottom:1px solid var(--line)">
-        <div class="small muted">${esc(p.st.task)}</div>
-        ${p.first && p.first.given ? `<div style="color:var(--warn)">✗ «${esc(p.first.given)}»
-           <span class="small muted">${p.first.missing.length? '— не хватило: '+p.first.missing.map(esc).join(', ') : '— фраза построена неверно'}</span></div>`
-          : `<div class="small muted">— пропущено —</div>`}
-        <div style="color:var(--accent);font-weight:600">✓ ${esc(p.st.model)}
-          <button class="speak" data-s="${esc(p.st.model)}">🔊</button></div>
-        ${(p.st.models||[]).length? `<div class="small muted">также: ${p.st.models.map(esc).join(' · ')}</div>`:''}
-      </div>`).join('') + `</div>`;
-  }
+  const review = `<div class="card"><h2>Ваши реплики</h2>${rows.join('')}</div>`;
   document.getElementById('view').innerHTML = review + `
    <div class="card done-hero">
      <div class="em">${nOk===d.steps.length?'🎉':'🗣'}</div>
