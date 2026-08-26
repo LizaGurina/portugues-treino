@@ -52,15 +52,19 @@ function ptVariants(pt){
   }
   return out;
 }
-function startVerbDay(){
-  const d = verbOfDay();
+function tensesForDrill(d){
   const v = DATA.verbs.find(x=>x.inf===d.inf);
-  const tenses = ['pres','estar','ir','pps'].filter(t=>{
+  return ['pres','estar','ir','pps'].filter(t=>{
     if(t==='pps' && !v.pps) return false;
     if(d.inf==='estar' && (t==='estar'||t==='ir')) return false;
     if(!d.cont && t==='estar') return false;
     return true;
   });
+}
+function startVerbDay(){
+  const d = verbOfDay();
+  const v = DATA.verbs.find(x=>x.inf===d.inf);
+  const tenses = tensesForDrill(d);
   const steps = [];
   tenses.forEach(t=>{
     const ps = shuffle([0,1,2,3,4]).slice(0, t==='pres'?5:3);
