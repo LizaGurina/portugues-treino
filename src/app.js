@@ -117,7 +117,7 @@ const TENSES = {
   pres:  {name:'Presente do Indicativo', short:'настоящее'},
   estar: {name:'Estar a + Infinitivo',   short:'происходит сейчас'},
   ir:    {name:'Ir + Infinitivo',        short:'будущее'},
-  pps:   {name:'Pretérito Perfeito Simples', short:'простое прошедшее'}
+  pps:   {name:'Pretérito Perfeito Simples do Indicativo (PPS)', short:'простое прошедшее'}
 };
 const ESTAR = ['estou a','estás a','está a','estamos a','estão a'];
 const IR    = ['vou','vais','vai','vamos','vão'];

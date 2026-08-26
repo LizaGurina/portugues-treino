@@ -33,7 +33,7 @@ function home(){
     <div class="opts" style="margin-top:8px">
       <button class="opt" id="lsVerb"><span class="k">1</span>
         <span><b>Глагол дня: ${vd.inf}</b>${mark('verb')}<br>
-        <span class="small muted">одна фраза во всех лицах · presente, ir&nbsp;+&nbsp;inf, pretérito${vd.cont?', estar a':''}</span></span></button>
+        <span class="small muted">одна фраза во всех лицах · Presente${vd.cont?' · Estar a + Inf.':''} · Ir + Inf. · PPS</span></span></button>
       <button class="opt" id="lsMain"><span class="k">2</span>
         <span><b>Тренировка · ${S.set.len} заданий</b>${mark('main')}<br>
         <span class="small muted">повторения + спряжения, предлоги, артикли, перевод</span></span></button>
@@ -55,7 +55,7 @@ function home(){
     <h2>Отдельные блоки</h2>
     <div class="grid">
       <button class="mode" data-f="conj"><div class="t">Времена и спряжения</div>
-        <div class="d">presente · estar a + inf · ir + inf · pretérito perfeito</div></button>
+        <div class="d">Presente · Estar a + Infinitivo · Ir + Infinitivo · PPS</div></button>
       <button class="mode" data-f="trans"><div class="t">Перевод с русского</div>
         <div class="d">фразы из учебника, ввод целиком</div></button>
       <button class="mode" data-f="prep"><div class="t">Предлоги и артикли</div>
