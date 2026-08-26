@@ -79,8 +79,9 @@ RULES = [
   ("Tu tens de comer melhor.", "Тебе нужно лучше питаться."),
   ("Elas têm de apanhar o metro.", "Им надо сесть на метро.")]),
 
-("estar_a", 4, "Estar a + инфинитив (настоящее продолженное)",
- "Действие происходит <b>прямо сейчас</b>, в момент речи.<br>"
+("estar_a", 4, "Estar a + Infinitivo (действие сейчас)",
+ "Действие происходит <b>прямо сейчас</b>, в момент речи. Аналог английского present continuous.<br>"
+ "Формально это <i>perífrase verbal</i> (глагольная конструкция), а не отдельное время.<br>"
  "estou a · estás a · está a · estamos a · estão a + инфинитив.<br>"
  "У возвратных глаголов местоимение переходит к инфинитиву: <i>estou a levantar-me</i>.",
  [("Eu estou a ler o livro.", "Я сейчас читаю книгу."),
@@ -120,8 +121,9 @@ RULES = [
   ("Carlos, eu vou contigo ao hospital.", "Карлуш, я пойду с тобой в больницу."),
   ("A Bruna estuda convosco?", "Бруна занимается с вами?")]),
 
-("ir_inf", 5, "Ir + инфинитив (будущее)",
- "Планы и действия в будущем: «собираюсь / буду».<br>"
+("ir_inf", 5, "Ir + Infinitivo (будущее)",
+ "Планы и действия в будущем: «собираюсь / буду». Это <i>futuro perifrástico</i> — "
+ "глагольная конструкция (perífrase), а не простое будущее время.<br>"
  "vou · vais · vai · vamos · vão + инфинитив.",
  [("Eu vou sair de casa às 9:00.", "Я выйду из дома в 9:00."),
   ("Vocês vão arrendar um apartamento nas férias.", "Вы снимете квартиру на отпуск."),

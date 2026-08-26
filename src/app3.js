@@ -54,7 +54,7 @@ function home(){
   <div class="card">
     <h2>Отдельные блоки</h2>
     <div class="grid">
-      <button class="mode" data-f="conj"><div class="t">Времена и спряжения</div>
+      <button class="mode" data-f="conj"><div class="t">Времена и конструкции</div>
         <div class="d">Presente · Estar a + Infinitivo · Ir + Infinitivo · PPS</div></button>
       <button class="mode" data-f="trans"><div class="t">Перевод с русского</div>
         <div class="d">фразы из учебника, ввод целиком</div></button>
