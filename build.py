@@ -64,9 +64,16 @@ def validate(data):
     for st in data["stories"]:
         for ph in st["phrases"]:
             unknown |= {w for w in tok(ph["pt"]) if w not in corpus}
+    import re as _re
+    strip_ph = lambda t: _re.sub(r"\{\w+\.\w+\}", " ", t)
     for d in data["dialogs"]:
         for step in d["steps"]:
-            unknown |= {w for w in tok(step["model"]) if w not in corpus}
+            unknown |= {w for w in tok(strip_ph(step["model"])) if w not in corpus}
+        for slot in (d.get("slots") or {}).values():
+            for v in slot:
+                for f, val in v.items():
+                    if f in ("pt", "frase", "loc", "lojaPt", "prodPt"):
+                        unknown |= {w for w in tok(val) if w not in corpus}
     ids = {r["id"] for r in data["rules"]}
     bad_rule = {x["rule"] for x in data["gaps"] + data["mc"] + data["trans"] if x["rule"] not in ids}
     return unknown, bad_rule

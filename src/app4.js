@@ -165,8 +165,22 @@ function dialogsList(){
 }
 
 let DLG = null;
+function instantiateDialog(d){
+  if(!d.slots) return d;
+  const chosen = {};
+  for(const k in d.slots) chosen[k] = d.slots[k][Math.floor(Math.random()*d.slots[k].length)];
+  const sub = s => s.replace(/\{(\w+)\.(\w+)\}/g,
+    (m,a,b)=> (chosen[a] && chosen[a][b]!==undefined) ? chosen[a][b] : m);
+  const deep = o => typeof o==='string' ? sub(o)
+    : Array.isArray(o) ? o.map(deep)
+    : (o && typeof o==='object') ? Object.fromEntries(Object.entries(o).map(([k,v])=>[k,deep(v)]))
+    : o;
+  const inst = deep(Object.assign({}, d, {slots:null}));
+  inst.slots = null;
+  return inst;
+}
 function startDialog(d){
-  DLG = {d, i:0, ok:0, tries:0, answers:[]};
+  DLG = {d: instantiateDialog(d), i:0, ok:0, tries:0, answers:[]};
   renderDialogIntro();
 }
 function renderDialogIntro(){
@@ -298,7 +312,8 @@ function judgeDialog(s, text){
   let bestSim = 0, bestModel = s.model;
   for(const m of models){ const v = sim(text, m); if(v > bestSim){ bestSim = v; bestModel = m; } }
   const grammarOk = bestSim >= 0.55;
-  const ok = missing.length === 0 && grammarOk;
+  const borderline = missing.length === 0 && !grammarOk && bestSim >= 0.38;
+  const ok = missing.length === 0 && (grammarOk || borderline);
   DLG.tries++;
   const firstTry = !DLG.answers.some(a=>a.step===DLG.i);
   DLG.answers.push({step:DLG.i, task:s.task, given:text, ok, model:s.model,
@@ -308,9 +323,10 @@ function judgeDialog(s, text){
     `<div class="ru" style="margin-top:6px">ещё можно сказать:<br>${m.map(x=>'· '+esc(x)).join('<br>')}</div>` : '';
   if(ok){
     DLG.ok++;
-    v.innerHTML = `<div class="verdict ok"><div class="big">✓ Отлично!</div>
-      <div class="ru">вы сказали: «${esc(text)}»</div>
-      <div class="ru">образец: ${esc(s.model)}</div>${variants(s.models)}</div>
+    const d0 = borderline ? wordDiff(text, bestModel) : null;
+    v.innerHTML = `<div class="verdict ok"><div class="big">${borderline?'✓ Принято — но сверься с образцом':'✓ Отлично!'}</div>
+      <div class="ru">вы сказали: ${borderline? d0.givenHtml : '«'+esc(text)+'»'}</div>
+      <div class="ru">образец: ${borderline? `<span class="diff">${d0.targetHtml}</span>` : esc(s.model)}</div>${variants(s.models)}</div>
       <button class="btn wide" id="next" style="margin-top:12px">Дальше →</button>`;
     say(s.model);
     document.getElementById('next').onclick = ()=>{ DLG.i++; renderDialogStep(); };
