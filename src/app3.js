@@ -17,9 +17,13 @@ function home(){
   const doneToday = (S.hist[today()]||{}).n || 0;
   const pct = c.total ? Math.round(c.learned/c.total*100) : 0;
   const vd = verbOfDay();
-  const st = storyOfDay();
+  const th = themeOfDay();
   const dn = lessonNum();
-  const dlg = DATA.dialogs[dn % DATA.dialogs.length];
+  // история и диалог — под тему дня, если есть подходящие
+  const stCands = DATA.stories.filter(s=> th.su && s.unit===th.su);
+  const st = stCands.length ? stCands[dn % stCands.length] : storyOfDay();
+  const dlgCands = DATA.dialogs.filter(d=> (th.dlg||[]).includes(d.id));
+  const dlg = dlgCands.length ? dlgCands[dn % dlgCands.length] : DATA.dialogs[dn % DATA.dialogs.length];
   const todayUnits = new Set([vd.unit, st.unit, dlg.unit]);
   const doneKey = k => (S.hist['done-'+k]===today());
   const mark = k => doneKey(k) ? ' ✓' : '';
@@ -34,17 +38,20 @@ function home(){
       <button class="opt" id="lsVerb"><span class="k">1</span>
         <span><b>Глагол дня: ${vd.inf}</b>${mark('verb')}<br>
         <span class="small muted">одна фраза во всех лицах · ${tensesForDrill(vd).map(t=>TENSES[t].name).join(' · ')}</span></span></button>
-      <button class="opt" id="lsMain"><span class="k">2</span>
+      <button class="opt" id="lsLex"><span class="k">2</span>
+        <span><b>📚 Лексика дня: ${th.icon} ${esc(th.ru)}</b>${mark('lex')}<br>
+        <span class="small muted">слова темы · узнавание и ввод вперемешку</span></span></button>
+      <button class="opt" id="lsMain"><span class="k">3</span>
         <span><b>Тренировка · ${S.set.len} заданий</b>${mark('main')}<br>
         <span class="small muted">повторения + спряжения, предлоги, артикли, перевод</span></span></button>
-      <button class="opt" id="lsStory"><span class="k">3</span>
-        <span><b>История: ${esc(st.title)}</b>${mark('story')}<br>
-        <span class="small muted">соберите рассказ из ${st.phrases.length} фраз · юнит ${st.unit}</span></span></button>
-      <button class="opt" id="lsDlg"><span class="k">4</span>
-        <span><b>Диалог: ${dlg.icon} ${esc(dlg.title)}</b>${mark('dlg')}<br>
-        <span class="small muted">говорите вслух в микрофон</span></span></button>
+      <button class="opt" id="lsStory"><span class="k">4</span>
+        <span><b>🗣 История: ${esc(st.title)}</b>${mark('story')}<br>
+        <span class="small muted">разговорная практика · ${st.phrases.length} фраз · юнит ${st.unit}</span></span></button>
+      <button class="opt" id="lsDlg"><span class="k">5</span>
+        <span><b>🗣 Диалог: ${dlg.icon} ${esc(dlg.title)}</b>${mark('dlg')}<br>
+        <span class="small muted">разговорная практика · говорите вслух в микрофон</span></span></button>
     </div>
-    ${['verb','main','story','dlg'].every(doneKey)
+    ${['verb','lex','main','story','dlg'].every(doneKey)
       ? `<button class="btn wide" id="finishLesson" style="margin-top:12px">✅ Завершить урок · открыть следующий</button>`
       : `<button class="btn ghost wide" id="finishLesson" style="margin-top:12px">Пропустить этот урок → следующий</button>`}
     <div class="bar"><i style="width:${pct}%"></i></div>
@@ -62,8 +69,8 @@ function home(){
         <div class="d">de/em · a/para/por · слияния do/na/pelo</div></button>
       <button class="mode" data-f="rules"><div class="t">Грамматика</div>
         <div class="d">ser/estar · императив · местоимения · há/desde</div></button>
-      <button class="mode" data-f="vocab"><div class="t">Лексика и роды</div>
-        <div class="d">${DATA.vocab.length} слов по темам учебника</div></button>
+      <button class="mode" id="toLexis"><div class="t">📚 Лексика по темам</div>
+        <div class="d">${DATA.vocab.length} слов · ${DATA.themes.length} тем · антонимы</div></button>
       <button class="mode" data-f="weak"><div class="t">Работа над ошибками</div>
         <div class="d">то, где чаще всего ошибаешься</div></button>
       <button class="mode" id="allDlg"><div class="t">🗣 Все диалоги</div>
@@ -91,14 +98,20 @@ function home(){
   </div>`;
   document.getElementById('finishLesson').onclick = ()=>{
     S.lessonOffset = (S.lessonOffset||0) + 1;
-    ['verb','main','story','dlg'].forEach(k=> delete S.hist['done-'+k]);
+    ['verb','lex','main','story','dlg'].forEach(k=> delete S.hist['done-'+k]);
     save(); home();
   };
   document.getElementById('lsVerb').onclick = ()=>{ S.hist['done-verb']=today(); save(); startVerbDay(); };
+  document.getElementById('lsLex').onclick = ()=>{
+    S.hist['done-lex']=today(); save();
+    const ids = new Set(themePool(th).map(p=>p.id));
+    startSession(p=> ids.has(p.id), th.icon+' '+th.ru);
+  };
   document.getElementById('lsMain').onclick = ()=>{ S.hist['done-main']=today(); save(); startSession(null); };
   document.getElementById('lsStory').onclick = ()=>{ S.hist['done-story']=today(); save(); startStory(st); };
   document.getElementById('lsDlg').onclick = ()=>{ S.hist['done-dlg']=today(); save(); startDialog(dlg); };
   document.getElementById('allDlg').onclick = dialogsList;
+  document.getElementById('toLexis').onclick = lexisList;
   document.getElementById('allStories').onclick = storiesList;
   document.querySelectorAll('[data-f]').forEach(b=> b.onclick = ()=>{
     const f = b.dataset.f;

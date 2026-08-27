@@ -5,7 +5,7 @@ import json, os, re, sys
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, os.path.join(HERE, 'src'))
 
-import verbs as V, vocab as VO, rules as R, items_gap as IG, items_trans as IT, lessons as L, stories as ST, dialogs as DG
+import verbs as V, vocab as VO, rules as R, items_gap as IG, items_trans as IT, lessons as L, stories as ST, dialogs as DG, themes as TH
 
 UNIT_NAMES = ["Olá! Eu sou a Ana.", "A tua amiga é muito simpática!", "Vamos almoçar?",
               "A vossa casa fica longe?", "Como vai estar o tempo?", "Estás melhor?",
@@ -42,6 +42,8 @@ def build_data():
         "stories": [dict(unit=u, title=t, phrases=[dict(ru=r, pt=p_, alts=a) for r,p_,a in ph])
                     for u,t,ph in ST.STORIES],
         "dialogs": DG.DIALOGS,
+        "themes": TH.THEMES,
+        "antonyms": TH.ANTONYMS,
     }
     for r, ru, pt, alts, u in IT.TRANS:
         alts = list(alts)
@@ -85,7 +87,7 @@ def main():
     if bad_rule:
         print("!! ссылки на несуществующие правила:", bad_rule)
     js = json.dumps(data, ensure_ascii=False, separators=(',', ':'))
-    parts = ['template_head.html', 'app.js', 'app2.js', 'app4.js', 'app3.js']
+    parts = ['template_head.html', 'app.js', 'app2.js', 'app4.js', 'app5.js', 'app3.js']
     out = open(os.path.join(HERE, 'src', parts[0]), encoding='utf-8').read().replace('/*__DATA__*/', js)
     for p in parts[1:]:
         out += open(os.path.join(HERE, 'src', p), encoding='utf-8').read() + "\n"

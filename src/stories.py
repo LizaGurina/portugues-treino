@@ -155,4 +155,16 @@ STORIES = [
    ("Когда он прилетел, он арендовал машину и приехал в отель в два часа.",
     "Quando chegou, alugou um carro e chegou ao hotel às duas.", ["Quando chegou, ele alugou um carro e chegou ao hotel às duas horas."]),
  ]),
+ (5, "Спортивная неделя", [
+   ("Во вторник я играю в футбол с друзьями.", "Na terça-feira, jogo futebol com os amigos.", ["À terça-feira, jogo futebol com os amigos."]),
+   ("В четверг мы занимаемся плаванием в бассейне.", "Na quinta-feira, praticamos natação na piscina.", ["À quinta-feira, praticamos natação na piscina."]),
+   ("По выходным я катаюсь на велосипеде у моря.", "Ao fim de semana, ando de bicicleta à beira-mar.", []),
+   ("Спорт полезнее, чем телевизор!", "O desporto é melhor do que a televisão!", ["O desporto é mais saudável do que a televisão!"]),
+ ]),
+ (3, "Неделя Аны", [
+   ("В понедельник и среду Ана работает в библиотеке.", "Na segunda e na quarta-feira, a Ana trabalha na biblioteca.", ["À segunda e à quarta-feira, a Ana trabalha na biblioteca."]),
+   ("В пятницу вечером она ужинает с подругами.", "Na sexta-feira à noite, ela janta com as amigas.", ["À sexta-feira à noite, janta com as amigas."]),
+   ("В субботу утром она ходит на рынок.", "No sábado de manhã, ela vai ao mercado.", ["Ao sábado de manhã, vai ao mercado."]),
+   ("Воскресенье — её любимый день: она отдыхает.", "O domingo é o dia preferido dela: ela descansa.", ["O domingo é o seu dia preferido: descansa."]),
+ ]),
 ]

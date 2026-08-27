@@ -149,6 +149,8 @@ function buildPool(){
                  rule: t==='pres'?'pres_regulares': t==='estar'?'estar_a': t==='ir'?'ir_inf':(v.pps&&DATA.ppsIrr.includes(v.inf)?'pps_irregulares':'pps_regulares')});
     });
   });
+  DATA.antonyms.forEach((x,i)=>
+    POOL.push({id:'a'+i, kind:'anto', i, unit:7, theme:'antónimos', group:'vocab'}));
   DATA.gaps.forEach((x,i)=> POOL.push({id:'x'+i, kind:'gap', i, unit:x.unit, rule:x.rule, group:'rules'}));
   DATA.mc.forEach((x,i)=>  POOL.push({id:'m'+i, kind:'mc',  i, unit:x.unit, rule:x.rule, group:'rules'}));
   DATA.trans.forEach((x,i)=>POOL.push({id:'t'+i, kind:'trans', i, unit:x.unit, rule:x.rule, group:'trans'}));
@@ -183,6 +185,14 @@ function pickSession(n, filter){
     out.push(...weak.slice(0, n-out.length));
   }
   return shuffle(out);
+}
+function themeOfDay(){
+  return DATA.themes[(dayNum(today()) + (S.lessonOffset||0)) % DATA.themes.length];
+}
+function themePool(th){
+  const keys = new Set(th.vt);
+  return POOL.filter(p => (p.theme && keys.has(p.theme)) ||
+                          (th.key==='festas' && p.kind==='anto'));
 }
 function shuffle(a){ a=[...a]; for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];} return a; }
 const rnd = a => a[Math.floor(Math.random()*a.length)];

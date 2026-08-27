@@ -3,7 +3,9 @@ function makeQ(p){ if(p._pre) return p._pre;
   const q = {p, id:p.id};
   if(p.kind==='vocab'){
     const m = S.items[p.id];
-    const production = m && m.b >= 2;      // сначала узнавание, потом производство
+    let production = m && m.b >= 2;        // сначала узнавание, потом производство
+    if(SES && SES.mode==='rec') production = false;
+    if(SES && SES.mode==='prod') production = true;
     if(production){
       q.type='input'; q.label='Переведите на португальский';
       q.prompt=p.ru; q.answers=[p.pt, (p.art? p.art+' '+p.pt : p.pt)];
@@ -32,6 +34,14 @@ function makeQ(p){ if(p._pre) return p._pre;
     if(!v.impersonal) PERSONS[i].split(', ').forEach(pr=> q.answers.push(pr+' '+form));
     q.speakAfter=form;
   }
+  else if(p.kind==='anto'){
+    const a = DATA.antonyms[p.i];
+    const fwd = Math.random()<.5;
+    const from = fwd? a[0] : a[1], to = fwd? a[1] : a[0];
+    q.type='input'; q.label='Назовите антоним';
+    q.prompt = from; q.sub = a[2];
+    q.answers=[to]; q.speakAfter = from + ' — ' + to;
+  }
   else if(p.kind==='gap'){
     const g = DATA.gaps[p.i];
     q.type='input'; q.label='Вставьте пропущенное';
@@ -55,11 +65,13 @@ function makeQ(p){ if(p._pre) return p._pre;
 
 /* ---------- сессия ---------- */
 let SES = null;
-function startSession(filter, title){
+function startSession(filter, title, mode){
   buildPool();
   const items = pickSession(S.set.len, filter);
   if(!items.length){ alert('Нет заданий по этому фильтру — проверьте выбранные юниты в настройках.'); return; }
-  SES = {queue:items.map(makeQ), i:0, right:0, wrong:0, again:[], title:title||'Ежедневная тренировка', log:[]};
+  SES = {queue:[], i:0, right:0, wrong:0, again:[], log:[],
+         title:title||'Ежедневная тренировка', mode: mode||null};
+  SES.queue = items.map(makeQ);
   renderSession();
 }
 function renderSession(){
