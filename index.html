@@ -743,18 +743,26 @@ function verbOfDay(){
   const drills = DATA.verbDrills.filter(d => S.set.units.includes(d.unit));
   return drills[lessonNum() % drills.length];
 }
+const PPS_MARKERS = [
+ {pt:'Ontem', ru:'Вчера'},
+ {pt:'Na semana passada', ru:'На прошлой неделе'},
+ {pt:'No mês passado', ru:'В прошлом месяце'},
+ {pt:'No ano passado', ru:'В прошлом году'},
+ {pt:'No fim de semana passado', ru:'В прошлые выходные'},
+];
 const U_SUBJ = ["У меня","У тебя","У неё","У нас","У них"];
 const BE_PAST = ["была","был(а)","была","были","были"];
-function ruPhrase(d, tense, p){
+function ruPhrase(d, tense, p, mk){
+  mk = mk || PPS_MARKERS[0];
   const subj = DATA.subjRu[p];
   if(d.inf==='estar'){
     if(tense==='pres') return `${subj} сейчас ${d.objRu}.`;
-    return `Вчера ${subj.toLowerCase()} ${BE_PAST[p]} ${d.objRu}.`;
+    return `${mk.ru} ${subj.toLowerCase()} ${BE_PAST[p]} ${d.objRu}.`;
   }
   if(d.inf==='ter'){
     if(tense==='pres') return `${U_SUBJ[p]} ${d.objRu}.`;
     if(tense==='ir') return `Завтра ${U_SUBJ[p].toLowerCase()} будет ${d.objRu}.`;
-    return `Вчера ${U_SUBJ[p].toLowerCase()} был ${d.objRu}.`;
+    return `${mk.ru} ${U_SUBJ[p].toLowerCase()} был ${d.objRu}.`;
   }
   if(tense==='pres') return `${subj} ${d.ruPres[p]} ${d.objRu}.`;
   if(tense==='estar') return `${subj} сейчас ${d.ruPres[p]} ${d.objRu}.`;
@@ -763,25 +771,26 @@ function ruPhrase(d, tense, p){
     return rf ? `${subj} ${rf[p]} ${d.objRu}.` : `${subj} ${DATA.futRu[p]} ${d.ruInf} ${d.objRu}.`;
   }
   const v = p===0||p===2 ? d.ruPastF : (p===1 ? d.ruPastF.replace(/ла( |$)/,'л(а)$1') : d.ruPastP);
-  return `Вчера ${subj.toLowerCase()} ${v} ${d.objRu}.`;
+  return `${mk.ru} ${subj.toLowerCase()} ${v} ${d.objRu}.`;
 }
-function ptPhrase(d, tense, p){
+function ptPhrase(d, tense, p, mk){
+  mk = mk || PPS_MARKERS[0];
   const v = DATA.verbs.find(x=>x.inf===d.inf);
   const f = conjForm(v, tense, p);
   if(!f) return null;
   const subj = DATA.subjPt[p];
   let pre = '';
-  if(tense==='pps') pre = 'Ontem, ';
+  if(tense==='pps') pre = mk.pt + ', ';
   if(tense==='ir' && d.inf==='ter') pre = 'Amanhã, ';
   const sj = pre ? (subj==='Eu'?'eu':subj[0].toLowerCase()+subj.slice(1)) : subj;
   return `${pre}${pre? sj.charAt(0)+sj.slice(1) : subj} ${f} ${d.obj}.`;
 }
 function ptVariants(pt){
   const out = [pt];
-  const noAdv = pt.replace(/^(Ontem|Amanhã), /,'');
+  const noAdv = pt.replace(/^(Ontem|Amanhã|Na semana passada|No mês passado|No ano passado|No fim de semana passado), /,'');
   if(noAdv!==pt) out.push(noAdv.charAt(0).toUpperCase()+noAdv.slice(1));
   for(const base of [...out]){
-    const m = base.match(/^(Ontem, |Amanhã, )?(eu|tu|ela|nós|eles)\s+(.+)$/i);
+    const m = base.match(/^((?:Ontem|Amanhã|Na semana passada|No mês passado|No ano passado|No fim de semana passado), )?(eu|tu|ela|nós|eles)\s+(.+)$/i);
     if(m){
       const rest = m[3];
       const v = (m[1]||'') + rest.charAt(0).toUpperCase() + rest.slice(1);
@@ -847,8 +856,9 @@ function startVerbDay(){
   tenses.forEach(t=>{
     const ps = shuffle([0,1,2,3,4]).slice(0, t==='pres'?5:3);
     ps.forEach(p=>{
-      const pt = ptPhrase(d,t,p); if(!pt) return;
-      steps.push({t, p, ru: ruPhrase(d,t,p), pt});
+      const mk = t==='pps' ? rnd(PPS_MARKERS) : null;
+      const pt = ptPhrase(d,t,p,mk); if(!pt) return;
+      steps.push({t, p, ru: ruPhrase(d,t,p,mk), pt});
     });
   });
   // конструкции: 3 случайные, применимые к глаголу
