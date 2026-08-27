@@ -128,6 +128,32 @@ function periQuestion(d, v, peri, p){
   if(peri.pps){ answers.push('Ontem, '+withSubj.charAt(0).toLowerCase()+withSubj.slice(1)); }
   return {ru, pt, answers, peri};
 }
+function verbDayMenu(){
+  buildPool();
+  const planned = verbOfDay();
+  const isIrr = inf => !!(DATA.verbs.find(x=>x.inf===inf)||{}).irr;
+  const regs = DATA.verbDrills.filter(d=>!isIrr(d.inf) && d.inf!==planned.inf);
+  const irrs = DATA.verbDrills.filter(d=> isIrr(d.inf) && d.inf!==planned.inf);
+  document.getElementById('view').innerHTML = `
+   <div class="row" style="margin-bottom:14px"><button class="btn ghost" id="back">← назад</button></div>
+   <div class="card"><h2>Глагол дня</h2>
+     <div class="opts">
+       <button class="opt" data-v="plan"><span class="k">1</span>
+         <span><b>По плану: ${planned.inf}</b> ${isIrr(planned.inf)?'· неправильный':'· правильный'}<br>
+         <span class="small muted">${esc(planned.ru||'')}</span></span></button>
+       <button class="opt" data-v="reg"><span class="k">2</span>
+         <span><b>Случайный правильный</b><br><span class="small muted">${regs.map(d=>d.inf).join(' · ')}</span></span></button>
+       <button class="opt" data-v="irr"><span class="k">3</span>
+         <span><b>Случайный неправильный</b><br><span class="small muted">${irrs.map(d=>d.inf).join(' · ')}</span></span></button>
+     </div>
+   </div>`;
+  document.getElementById('back').onclick = home;
+  document.querySelectorAll('[data-v]').forEach(b=> b.onclick = ()=>{
+    const c = b.dataset.v;
+    const d = c==='plan' ? planned : rnd(c==='reg'? regs : irrs);
+    startVerbDay(d);
+  });
+}
 function tensesForDrill(d){
   const v = DATA.verbs.find(x=>x.inf===d.inf);
   return ['pres','estar','ir','pps'].filter(t=>{
@@ -137,8 +163,8 @@ function tensesForDrill(d){
     return true;
   });
 }
-function startVerbDay(){
-  const d = verbOfDay();
+function startVerbDay(drill){
+  const d = drill || verbOfDay();
   const v = DATA.verbs.find(x=>x.inf===d.inf);
   const tenses = tensesForDrill(d);
   const steps = [];

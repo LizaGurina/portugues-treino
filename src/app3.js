@@ -103,7 +103,7 @@ function home(){
     ['verb','lex','main','story','dlg'].forEach(k=> delete S.hist['done-'+k]);
     save(); home();
   };
-  document.getElementById('lsVerb').onclick = ()=>{ S.hist['done-verb']=today(); save(); startVerbDay(); };
+  document.getElementById('lsVerb').onclick = ()=>{ S.hist['done-verb']=today(); save(); verbDayMenu(); };
   document.getElementById('lsLex').onclick = ()=>{
     S.hist['done-lex']=today(); save();
     const ids = new Set(themePool(th).map(p=>p.id));
