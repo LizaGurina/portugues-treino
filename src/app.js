@@ -193,6 +193,11 @@ function pickSession(n, filter){
                      .sort((a,b)=> (S.items[b.id].w||0)-(S.items[a.id].w||0));
     out.push(...weak.slice(0, n-out.length));
   }
+  if(out.length < n){ // всё уже пройдено — повторяем досрочно (ближайшие по сроку первыми)
+    const rest = pool.filter(p=>!out.includes(p))
+      .sort((a,b)=> (((S.items[a.id]||{}).due)||'9999').localeCompare((((S.items[b.id]||{}).due)||'9999')));
+    out.push(...rest.slice(0, n-out.length));
+  }
   return shuffle(out);
 }
 function themeOfDay(){
