@@ -259,6 +259,26 @@ function setView(){
     document.getElementById('f-'+r.dataset.focus).textContent = r.value+'%'; save(); });
 }
 
+/* ---------- проверка новой версии ---------- */
+function checkUpdate(){
+  fetch(location.pathname, {cache:'no-store'})
+    .then(r=>r.text())
+    .then(t=>{
+      const m = t.match(/BUILD_ID = '([^']+)'/);
+      if(m && m[1] !== BUILD_ID){
+        if(document.getElementById('updChip')) return;
+        const b = document.createElement('button');
+        b.id='updChip'; b.className='btn';
+        b.style.cssText='position:fixed;bottom:18px;left:50%;transform:translateX(-50%);z-index:99;box-shadow:var(--shadow)';
+        b.textContent = '⬆️ Доступна новая версия — обновить';
+        b.onclick = ()=> location.reload();
+        document.body.appendChild(b);
+      }
+    }).catch(()=>{});
+}
+setTimeout(checkUpdate, 3000);
+setInterval(checkUpdate, 10*60*1000);
+
 /* ---------- старт ---------- */
 buildPool();
 home();
