@@ -149,6 +149,15 @@ function buildPool(){
                  rule: t==='pres'?'pres_regulares': t==='estar'?'estar_a': t==='ir'?'ir_inf':(v.pps&&DATA.ppsIrr.includes(v.inf)?'pps_irregulares':'pps_regulares')});
     });
   });
+  NUM_SET.forEach(n=>{
+    const unit = n<=50?1: n<=160?2: 4;
+    POOL.push({id:'nw'+n, kind:'numw', n, unit, theme:'números', group:'rules'});
+    POOL.push({id:'nh'+n, kind:'numh', n, unit, theme:'números', group:'rules'});
+  });
+  HORA_SET.forEach(t=>{
+    POOL.push({id:'hw'+t, kind:'horaw', t, unit:3, theme:'horas', group:'rules'});
+    POOL.push({id:'hh'+t, kind:'horah', t, unit:3, theme:'horas', group:'rules'});
+  });
   DATA.antonyms.forEach((x,i)=>
     POOL.push({id:'a'+i, kind:'anto', i, unit:7, theme:'antónimos', group:'vocab'}));
   DATA.gaps.forEach((x,i)=> POOL.push({id:'x'+i, kind:'gap', i, unit:x.unit, rule:x.rule, group:'rules'}));

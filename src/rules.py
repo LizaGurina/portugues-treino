@@ -268,4 +268,88 @@ RULES = [
  [("A Rita é de Lisboa, mas mora em Coimbra.", "Рита из Лиссабона, но живёт в Коимбре."),
   ("Brasília é a capital do Brasil.", "Бразилиа — столица Бразилии."),
   ("O metro passa pela Avenida da Liberdade.", "Метро проходит по Авениде да Либердаде.")]),
+
+("demonstrativos", 2, "Указательные: este / esse / aquele, isto / isso / aquilo",
+ "<b>este/esta/estes/estas</b> — близко к говорящему (здесь)<br>"
+ "<b>esse/essa/esses/essas</b> — близко к собеседнику (там, у тебя)<br>"
+ "<b>aquele/aquela/aqueles/aquelas</b> — далеко от обоих (вон там)<br>"
+ "Средний род (о неназванном предмете): <b>isto</b> (это здесь) · <b>isso</b> (то у тебя) · <b>aquilo</b> (вон то).",
+ [("Este é o Filipe, o meu colega de trabalho.", "Это Филипе, мой коллега. (рядом со мной)"),
+  ("Essa pasta é sua?", "Эта папка (у вас) ваша?"),
+  ("O que é isto?", "Что это (у меня в руках)?"),
+  ("Aquela casa é muito bonita.", "Вон тот дом очень красивый.")]),
+
+("cortesia", 3, "Queria… / Podia…? — вежливая просьба",
+ "Форма вежливости (imperfeito de cortesia): вместо «quero» говорят <b>queria</b> — «я бы хотел(а)», "
+ "вместо «pode» — <b>podia</b> — «не могли бы вы».<br>"
+ "queria + существительное/инфинитив · podia + инфинитив.",
+ [("Queria um café, por favor.", "Я бы хотела кофе, пожалуйста."),
+  ("Queria reservar uma mesa.", "Я бы хотела забронировать столик."),
+  ("Podia dizer-me onde fica a Câmara Municipal?", "Не могли бы вы сказать, где мэрия?"),
+  ("Podia repetir, por favor?", "Не могли бы вы повторить?")]),
+
+("costumar", 3, "Costumar + инфинитив — «обычно»",
+ "Привычное, регулярное действие: <b>costumo, costumas, costuma, costumamos, costumam</b> + инфинитив.<br>"
+ "Отвечает на «что ты обычно делаешь?»",
+ [("Eu costumo almoçar ao meio-dia.", "Я обычно обедаю в полдень."),
+  ("O Fred costuma almoçar no restaurante à quarta-feira.", "Фред обычно обедает в ресторане по средам."),
+  ("Nós costumamos ver um filme ao fim de semana.", "Мы обычно смотрим фильм по выходным.")]),
+
+("precisar_dever", 6, "Precisar de и dever + инфинитив",
+ "<b>ter de</b> — жёсткая необходимость («должен») · <b>precisar de</b> — нужда («мне нужно») · "
+ "<b>dever</b> — совет, рекомендация («следует, стоит»).<br>"
+ "precisar всегда с <b>de</b>: <i>preciso de estudar</i>; dever — без предлога: <i>deves dormir mais</i>.",
+ [("Preciso de ir à farmácia.", "Мне нужно в аптеку."),
+  ("Estás doente: deves ficar em casa.", "Ты болеешь: тебе стоит остаться дома."),
+  ("Tenho de estudar para o exame.", "Я должна заниматься перед экзаменом.")]),
+
+("estar_com_ter", 6, "Estar com / Ter + существительное",
+ "Состояния выражаются двумя способами: <b>ter</b> + nome (постояннее) и <b>estar com</b> + nome (прямо сейчас).<br>"
+ "<i>fome</i> (голод), <i>sede</i> (жажда), <i>frio, calor, febre, sono</i> (сонливость), <i>medo</i> (страх), <i>dores</i>.",
+ [("Estou com fome.", "Я голодная (сейчас)."),
+  ("O bebé está com sono.", "Малыш хочет спать."),
+  ("Tenho febre e dores de cabeça.", "У меня температура и болит голова."),
+  ("Estás com frio? Veste o casaco!", "Тебе холодно? Надень куртку!")]),
+
+("impessoal_se", 7, "Безличная форма c se",
+ "Действие без конкретного деятеля — «здесь говорят / едят / продаётся»: глагол в 3-м лице + <b>se</b>.<br>"
+ "Единственное или множественное число — по существительному: <i>fala-se português</i>, <i>comem-se tantos doces</i>.",
+ [("Em Portugal, fala-se português.", "В Португалии говорят по-португальски."),
+  ("No Natal, comem-se muitos doces.", "На Рождество едят много сладостей."),
+  ("Come-se muito bem neste restaurante.", "В этом ресторане очень хорошо кормят.")]),
+
+("andar_adj", 6, "Andar + прилагательное — «в последнее время»",
+ "<b>andar</b> + прилагательное описывает затянувшееся состояние (не разовый момент, как estar):<br>"
+ "<i>ando cansada</i> — я в последнее время усталая.",
+ [("Os pais da Maria andam nervosos.", "Родители Марии в последнее время нервничают."),
+  ("Eu ando cansado por ter muito trabalho.", "Я всё время усталый из-за большой нагрузки."),
+  ("Tu andas muito ocupada?", "Ты в последнее время очень занята?")]),
+
+("ordinais", 1, "Порядковые числительные (1.º–6.º)",
+ "<b>primeiro, segundo, terceiro, quarto, quinto, sexto</b> — согласуются в роде и числе: "
+ "<i>a primeira rua, o terceiro andar</i>.<br>"
+ "В адресах и этажах: <i>no segundo andar</i>; в датах не используются (там количественные: <i>treze de junho</i>).",
+ [("Vira na primeira rua à direita.", "Поверни на первой улице направо."),
+  ("O escritório fica no terceiro andar.", "Офис на третьем этаже."),
+  ("É a segunda vez que visito Lisboa.", "Я во второй раз в Лиссабоне.")]),
+
+("números", 4, "Числа до 1000",
+ "16–19: <b>dezasseis, dezassete, dezoito, dezanove</b> (европейская норма).<br>"
+ "Десятки + единицы через <b>e</b>: <i>vinte e um, quarenta e dois</i>.<br>"
+ "<b>cem</b> — ровно 100, <b>cento e</b> — 101–199: <i>cento e quinze</i>.<br>"
+ "200–900: <i>duzentos, trezentos, quatrocentos, quinhentos, seiscentos, setecentos, oitocentos, novecentos</i> · 1000 — <b>mil</b>.",
+ [("quarenta e dois", "42"),
+  ("cento e quinze", "115"),
+  ("quinhentos e dezasseis", "516"),
+  ("novecentos e noventa e nove", "999")]),
+
+("horas", 3, "Который час",
+ "<b>Que horas são?</b> — «Который час?»<br>"
+ "<b>São</b> + число (ж. р.: <i>uma, duas</i>): <i>São três horas. É uma hora.</i><br>"
+ "<i>e meia</i> — половина · <i>e um quarto</i> — четверть · минуты просто числом: <i>dez e vinte</i>.<br>"
+ "<b>meio-dia</b> — полдень · <b>meia-noite</b> — полночь · часть дня: <i>da manhã, da tarde, da noite</i>.",
+ [("São nove e meia da manhã.", "Половина десятого утра (9:30)."),
+  ("É uma e um quarto.", "Четверть второго (1:15)."),
+  ("O comboio parte ao meio-dia.", "Поезд отходит в полдень."),
+  ("São cinco da tarde.", "Пять часов вечера (17:00).")]),
 ]

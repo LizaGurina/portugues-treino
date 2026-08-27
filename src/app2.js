@@ -34,6 +34,28 @@ function makeQ(p){ if(p._pre) return p._pre;
     if(!v.impersonal) PERSONS[i].split(', ').forEach(pr=> q.answers.push(pr+' '+form));
     q.speakAfter=form;
   }
+  else if(p.kind==='numw'){
+    q.type='input'; q.label='Напишите число словами';
+    q.prompt=String(p.n); q.answers=[numToPt(p.n)];
+    q.speakAfter=numToPt(p.n); q.rule='números';
+  }
+  else if(p.kind==='numh'){
+    q.type='input'; q.label='Число на слух — запишите цифрами';
+    q.prompt='🔊'; q.sub='нажмите динамик, чтобы прослушать ещё раз';
+    q.answers=[String(p.n)]; q.speakNow=numToPt(p.n); q.speakAfter=numToPt(p.n);
+    q.rule='números'; q.note='пишите цифрами: 42';
+  }
+  else if(p.kind==='horaw'){
+    q.type='input'; q.label='Скажите время по-португальски';
+    q.prompt='🕐 '+p.t; q.answers=horaWords(p.t);
+    q.speakAfter=horaWords(p.t)[0]; q.rule='horas';
+  }
+  else if(p.kind==='horah'){
+    q.type='input'; q.label='Время на слух — запишите цифрами';
+    q.prompt='🔊'; q.sub='например: 14:30';
+    q.answers=horaDigits(p.t); q.speakNow=horaWords(p.t)[0];
+    q.speakAfter=horaWords(p.t)[0]; q.rule='horas';
+  }
   else if(p.kind==='anto'){
     const a = DATA.antonyms[p.i];
     const fwd = Math.random()<.5;
