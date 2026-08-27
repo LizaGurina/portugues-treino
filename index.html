@@ -389,7 +389,9 @@ function buildPool(){
   DATA.gaps.forEach((x,i)=> POOL.push({id:'x'+i, kind:'gap', i, unit:x.unit, rule:x.rule, group:'rules'}));
   DATA.mc.forEach((x,i)=>  POOL.push({id:'m'+i, kind:'mc',  i, unit:x.unit, rule:x.rule, group:'rules'}));
   DATA.trans.forEach((x,i)=>POOL.push({id:'t'+i, kind:'trans', i, unit:x.unit, rule:x.rule, group:'trans'}));
-  POOL = POOL.filter(p => S.set.units.includes(p.unit));
+  // числа/часы/антонимы — сквозные, не зависят от выбранных юнитов
+  const CROSS = new Set(['numw','numh','horaw','horah','anto']);
+  POOL = POOL.filter(p => CROSS.has(p.kind) || S.set.units.includes(p.unit));
 }
 
 /* ---------- подбор сессии ---------- */
