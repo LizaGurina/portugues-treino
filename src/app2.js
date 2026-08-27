@@ -29,7 +29,9 @@ function makeQ(p){ if(p._pre) return p._pre;
     q.type='input'; q.label=TENSES[p.tense].name;
     q.conj={v, tense:p.tense, person:i};
     q.prompt=`${PERSONS[i]} — <span style="color:var(--accent)">${v.inf}</span>`;
-    q.sub=`${v.ru} · ${TENSES[p.tense].short}`;
+    const MK = {pres:'обычно', estar:'прямо сейчас', ir:'завтра', pps:'вчера'};
+    const SUBJ_LC = ['я','ты','она','мы','они'];
+    q.subHtml = `${esc(v.ru)} · <b style="color:var(--warn)">${TENSES[p.tense].short} — ${MK[p.tense]} ${SUBJ_LC[i]}…</b>`;
     q.answers=[form];
     if(!v.impersonal) PERSONS[i].split(', ').forEach(pr=> q.answers.push(pr+' '+form));
     q.speakAfter=form;
@@ -108,7 +110,8 @@ function renderSession(){
   if(q.gap){
     body += `<div class="gapline">${q.gap.replace(/___/g,'<u>&nbsp;</u>')}</div>`;
   }else{
-    body += `<div class="prompt${q.big?'':' pt'}">${q.prompt}${q.sub?`<small>${esc(q.sub)}</small>`:''}</div>`;
+    body += `<div class="prompt${q.big?'':' pt'}">${q.prompt}${
+      q.subHtml?`<small>${q.subHtml}</small>` : q.sub?`<small>${esc(q.sub)}</small>`:''}</div>`;
   }
   if(q.type==='input'){
     body += `<input class="answer" id="ans" autocomplete="off" autocapitalize="off" spellcheck="false"
