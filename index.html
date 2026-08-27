@@ -821,7 +821,34 @@ const PERIS = [
  {id:'começar a', rule:'pps_regulares', pps:true, needCont:true,
   aux:['comecei a','começaste a','começou a','começámos a','começaram a'],
   ru:['Вчера я начала','Вчера ты начал(а)','Вчера она начала','Вчера мы начали','Вчера они начали']},
+ {id:'adorar', rule:null, aux:['adoro','adoras','adora','adoramos','adoram'],
+  ru:['Я обожаю','Ты обожаешь','Она обожает','Мы обожаем','Они обожают']},
+ {id:'saber', rule:'saber_conhecer', skill:true,
+  aux:['sei','sabes','sabe','sabemos','sabem'],
+  ru:['Я умею','Ты умеешь','Она умеет','Мы умеем','Они умеют']},
+ {id:'tentar', rule:null, needCont:true,
+  aux:['tento','tentas','tenta','tentamos','tentam'],
+  ru:['Я пытаюсь','Ты пытаешься','Она пытается','Мы пытаемся','Они пытаются']},
+ {id:'vir', rule:null, needCont:true,
+  aux:['venho','vens','vem','vimos','vêm'],
+  ru:['Я прихожу','Ты приходишь','Она приходит','Мы приходим','Они приходят']},
+ {id:'ficar a', rule:null, needCont:true,
+  aux:['fico a','ficas a','fica a','ficamos a','ficam a'],
+  ru:['Я остаюсь','Ты остаёшься','Она остаётся','Мы остаёмся','Они остаются']},
+ {id:'aprender a', rule:null, needCont:true,
+  aux:['aprendo a','aprendes a','aprende a','aprendemos a','aprendem a'],
+  ru:['Я учусь','Ты учишься','Она учится','Мы учимся','Они учатся']},
+ {id:'ajudar a', rule:null, needCont:true,
+  aux:['ajudo a','ajudas a','ajuda a','ajudamos a','ajudam a'],
+  ru:['Я помогаю','Ты помогаешь','Она помогает','Мы помогаем','Они помогают']},
+ {id:'queria (cortesia)', rule:'cortesia', persons:[0],
+  aux:['queria','querias','queria','queríamos','queriam'],
+  ru:['Я бы хотела','Ты бы хотел(а)','Она бы хотела','Мы бы хотели','Они бы хотели']},
+ {id:'é melhor', rule:'precisar_dever', persons:[2], impersonalRu:true,
+  aux:['é melhor','é melhor','é melhor','é melhor','é melhor'],
+  ru:['Лучше','Лучше','Лучше','Лучше','Лучше']},
 ];
+const SKILL_VERBS = new Set(['falar','ler','escrever','fazer','cozinhar','nadar','jogar','dançar']);
 function infFor(v, p){
   return v.refl ? v.inf.slice(0,-2) + REFL[p] : v.inf;
 }
@@ -830,7 +857,7 @@ function periQuestion(d, v, peri, p){
   const pt = `${DATA.subjPt[p]==='Eu'&&!peri.pps?'':''}${peri.aux[p].charAt(0).toUpperCase()+peri.aux[p].slice(1)} ${inf} ${d.obj}.`;
   const ru = peri.usePres
     ? `${DATA.subjRu[p]} обычно ${d.ruPres[p]} ${d.objRu}.`
-    : `${peri.ru[p]} ${d.ruInf} ${d.objRu}.`;
+    : `${peri.ru[p]} ${d.ruInf} ${d.objRu}${peri.id==='queria (cortesia)' ? ', пожалуйста' : ''}.`;
   // варианты: с местоимением впереди
   const subj = DATA.subjPt[p];
   const withSubj = `${subj} ${peri.aux[p]} ${inf} ${d.obj}.`;
@@ -866,10 +893,13 @@ function startVerbDay(){
     const cands = PERIS.filter(pe =>
       pe.id.split(' ')[0] !== d.inf &&          // не дублируем сам глагол дня
       (!pe.needCont || d.cont) &&
+      (!pe.skill || SKILL_VERBS.has(d.inf)) &&
       (!pe.usePres || d.ruPres) &&
-      !(d.inf==='poder' && ['querer','conseguir','dever'].includes(pe.id)));
-    shuffle(cands).slice(0,3).forEach(pe=>{
-      const p = Math.floor(Math.random()*5);
+      !(d.inf==='poder' && ['querer','conseguir','dever','queria (cortesia)'].includes(pe.id)) &&
+      !(d.inf==='querer' && pe.id==='queria (cortesia)'));
+    shuffle(cands).slice(0,5).forEach(pe=>{
+      const ps = pe.persons || [0,1,2,3,4];
+      const p = ps[Math.floor(Math.random()*ps.length)];
       const q = periQuestion(d, v, pe, p);
       steps.push({t:'peri', p, ru:q.ru, pt:q.pt, peri:pe, answers:q.answers});
     });
