@@ -37,7 +37,7 @@ function home(){
     <div class="opts" style="margin-top:8px">
       <button class="opt" id="lsVerb"><span class="k">1</span>
         <span><b>Глагол дня: ${vd.inf}</b>${mark('verb')}<br>
-        <span class="small muted">одна фраза во всех лицах · ${tensesForDrill(vd).map(t=>TENSES[t].name).join(' · ')}</span></span></button>
+        <span class="small muted">одна фраза во всех лицах · ${tensesForDrill(vd).map(t=>TENSES[t].name).join(' · ')} · конструкции (ter de, costumar…)</span></span></button>
       <button class="opt" id="lsLex"><span class="k">2</span>
         <span><b>📚 Лексика дня: ${th.icon} ${esc(th.ru)}</b>${mark('lex')}<br>
         <span class="small muted">слова темы · узнавание и ввод вперемешку</span></span></button>

@@ -790,6 +790,46 @@ function ptVariants(pt){
   }
   return out;
 }
+/* глагольные конструкции из учебника: aux + (prep) + infinitivo */
+const PERIS = [
+ {id:'ter de', rule:'ter_de', aux:['tenho de','tens de','tem de','temos de','têm de'],
+  ru:['Я должна','Ты должен (должна)','Она должна','Мы должны','Они должны']},
+ {id:'precisar de', rule:'precisar_dever', aux:['preciso de','precisas de','precisa de','precisamos de','precisam de'],
+  ru:['Мне нужно','Тебе нужно','Ей нужно','Нам нужно','Им нужно']},
+ {id:'dever', rule:'precisar_dever', aux:['devo','deves','deve','devemos','devem'],
+  ru:['Мне стоит','Тебе стоит','Ей стоит','Нам стоит','Им стоит']},
+ {id:'costumar', rule:'costumar', aux:['costumo','costumas','costuma','costumamos','costumam'], usePres:true},
+ {id:'gostar de', rule:null, aux:['gosto de','gostas de','gosta de','gostamos de','gostam de'],
+  ru:['Я люблю','Ты любишь','Она любит','Мы любим','Они любят']},
+ {id:'querer', rule:null, aux:['quero','queres','quer','queremos','querem'],
+  ru:['Я хочу','Ты хочешь','Она хочет','Мы хотим','Они хотят']},
+ {id:'preferir', rule:null, aux:['prefiro','preferes','prefere','preferimos','preferem'],
+  ru:['Я предпочитаю','Ты предпочитаешь','Она предпочитает','Мы предпочитаем','Они предпочитают']},
+ {id:'poder', rule:'saber_conhecer', aux:['posso','podes','pode','podemos','podem'],
+  ru:['Я могу','Ты можешь','Она может','Мы можем','Они могут']},
+ {id:'conseguir', rule:'saber_conhecer', aux:['consigo','consegues','consegue','conseguimos','conseguem'],
+  ru:['У меня получается','У тебя получается','У неё получается','У нас получается','У них получается']},
+ {id:'começar a', rule:'pps_regulares', pps:true, needCont:true,
+  aux:['comecei a','começaste a','começou a','começámos a','começaram a'],
+  ru:['Вчера я начала','Вчера ты начал(а)','Вчера она начала','Вчера мы начали','Вчера они начали']},
+];
+function infFor(v, p){
+  return v.refl ? v.inf.slice(0,-2) + REFL[p] : v.inf;
+}
+function periQuestion(d, v, peri, p){
+  const inf = infFor(v, p);
+  const pt = `${DATA.subjPt[p]==='Eu'&&!peri.pps?'':''}${peri.aux[p].charAt(0).toUpperCase()+peri.aux[p].slice(1)} ${inf} ${d.obj}.`;
+  const ru = peri.usePres
+    ? `${DATA.subjRu[p]} обычно ${d.ruPres[p]} ${d.objRu}.`
+    : `${peri.ru[p]} ${d.ruInf} ${d.objRu}.`;
+  // варианты: с местоимением впереди
+  const subj = DATA.subjPt[p];
+  const withSubj = `${subj} ${peri.aux[p]} ${inf} ${d.obj}.`;
+  const answers = ptVariants(pt);
+  if(!answers.includes(withSubj)) answers.push(withSubj);
+  if(peri.pps){ answers.push('Ontem, '+withSubj.charAt(0).toLowerCase()+withSubj.slice(1)); }
+  return {ru, pt, answers, peri};
+}
 function tensesForDrill(d){
   const v = DATA.verbs.find(x=>x.inf===d.inf);
   return ['pres','estar','ir','pps'].filter(t=>{
@@ -811,16 +851,32 @@ function startVerbDay(){
       steps.push({t, p, ru: ruPhrase(d,t,p), pt});
     });
   });
+  // конструкции: 3 случайные, применимые к глаголу
+  if(!v.impersonal && d.inf!=='estar'){
+    const cands = PERIS.filter(pe =>
+      pe.id.split(' ')[0] !== d.inf &&          // не дублируем сам глагол дня
+      (!pe.needCont || d.cont) &&
+      (!pe.usePres || d.ruPres) &&
+      !(d.inf==='poder' && ['querer','conseguir','dever'].includes(pe.id)));
+    shuffle(cands).slice(0,3).forEach(pe=>{
+      const p = Math.floor(Math.random()*5);
+      const q = periQuestion(d, v, pe, p);
+      steps.push({t:'peri', p, ru:q.ru, pt:q.pt, peri:pe, answers:q.answers});
+    });
+  }
   SES = {queue: steps.map(s=>{ const q = ({
       p:{id:'vd-'+d.inf+'-'+s.t+'-'+s.p, kind:'trans', unit:d.unit, group:'trans',
          rule: s.t==='pres'?'pres_regulares':s.t==='estar'?'estar_a':s.t==='ir'?'ir_inf':'pps_regulares'},
       id:'vd-'+d.inf+'-'+s.t+'-'+s.p,
       type:'input', big:true,
-      label:`Глагол дня: ${d.inf} · ${TENSES[s.t].name}`,
-      prompt: s.ru, answers: ptVariants(s.pt),
+      label: s.t==='peri'
+        ? `Глагол дня: ${d.inf} · конструкция ${s.peri.id} + Infinitivo`
+        : `Глагол дня: ${d.inf} · ${TENSES[s.t].name}`,
+      prompt: s.ru, answers: s.answers || ptVariants(s.pt),
       speakAfter: s.pt,
-      rule: s.t==='pres'?'pres_regulares':s.t==='estar'?'estar_a':s.t==='ir'?'ir_inf':'pps_regulares',
-      conj:{v, tense:s.t, person:s.p}
+      rule: s.t==='peri' ? s.peri.rule
+        : (s.t==='pres'?'pres_regulares':s.t==='estar'?'estar_a':s.t==='ir'?'ir_inf':'pps_regulares'),
+      conj: s.t==='peri' ? null : {v, tense:s.t, person:s.p}
     }); q.p._pre = q; return q; }), i:0, right:0, wrong:0, again:[], log:[], title:'Глагол дня'};
   renderSession();
 }
@@ -1248,7 +1304,7 @@ function home(){
     <div class="opts" style="margin-top:8px">
       <button class="opt" id="lsVerb"><span class="k">1</span>
         <span><b>Глагол дня: ${vd.inf}</b>${mark('verb')}<br>
-        <span class="small muted">одна фраза во всех лицах · ${tensesForDrill(vd).map(t=>TENSES[t].name).join(' · ')}</span></span></button>
+        <span class="small muted">одна фраза во всех лицах · ${tensesForDrill(vd).map(t=>TENSES[t].name).join(' · ')} · конструкции (ter de, costumar…)</span></span></button>
       <button class="opt" id="lsLex"><span class="k">2</span>
         <span><b>📚 Лексика дня: ${th.icon} ${esc(th.ru)}</b>${mark('lex')}<br>
         <span class="small muted">слова темы · узнавание и ввод вперемешку</span></span></button>
