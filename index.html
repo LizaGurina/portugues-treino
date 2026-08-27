@@ -375,6 +375,15 @@ function buildPool(){
                  rule: t==='pres'?'pres_regulares': t==='estar'?'estar_a': t==='ir'?'ir_inf':(v.pps&&DATA.ppsIrr.includes(v.inf)?'pps_irregulares':'pps_regulares')});
     });
   });
+  DATA.verbDrills.forEach((d,i)=>{
+    ['pres','estar','ir','pps'].forEach(t=>{
+      if(t==='estar' && !d.cont) return;
+      if(d.inf==='estar' && (t==='estar'||t==='ir')) return;
+      const v = DATA.verbs.find(x=>x.inf===d.inf);
+      if(t==='pps' && (!v || !v.pps)) return;
+      POOL.push({id:'ch'+i+t, kind:'conjh', di:i, tense:t, unit:d.unit, group:'conj', irr:!!(v&&v.irr)});
+    });
+  });
   NUM_SET.forEach(n=>{
     const unit = n<=50?1: n<=160?2: 4;
     POOL.push({id:'nw'+n, kind:'numw', n, unit, theme:'números', group:'rules'});
@@ -476,6 +485,28 @@ function makeQ(p){ if(p._pre) return p._pre;
     q.answers=[form];
     if(!v.impersonal) PERSONS[i].split(', ').forEach(pr=> q.answers.push(pr+' '+form));
     q.speakAfter=form;
+  }
+  else if(p.kind==='conjh'){
+    const d = DATA.verbDrills[p.di];
+    const persons = [0,1,2,3,4];
+    const pers = rnd(persons);
+    const pt = ptPhrase(d, p.tense, pers);
+    const correct = ruPhrase(d, p.tense, pers);
+    const opts = [correct];
+    let guard = 0;
+    while(opts.length < 4 && guard++ < 60){
+      const t2 = rnd(['pres','estar','ir','pps'].filter(t=>
+        !(t==='estar' && !d.cont) && !(d.inf==='estar' && (t==='estar'||t==='ir'))));
+      const p2 = rnd(persons);
+      if(!ptPhrase(d, t2, p2)) continue;
+      const ru2 = ruPhrase(d, t2, p2);
+      if(!opts.includes(ru2)) opts.push(ru2);
+    }
+    q.type='choice'; q.label='Спряжение на слух — что это значит?';
+    q.prompt='🔊'; q.sub='прослушайте фразу и выберите перевод';
+    q.speakNow=pt; q.speakAfter=pt;
+    q.options=shuffle(opts); q.correct=correct;
+    q.rule = p.tense==='pres'?'pres_regulares':p.tense==='estar'?'estar_a':p.tense==='ir'?'ir_inf':'pps_regulares';
   }
   else if(p.kind==='numw'){
     q.type='input'; q.label='Напишите число словами';
@@ -1351,13 +1382,17 @@ function conjMenu(){
          <span><b>Только правильные</b><br><span class="small muted">-ar / -er / -ir без сюрпризов · ${nReg} карточек</span></span></button>
        <button class="opt" data-c="irr"><span class="k">3</span>
          <span><b>Только неправильные</b><br><span class="small muted">ser, ir, fazer, pôr… и глаголы с чередованием (prefiro, durmo) · ${nIrr} карточек</span></span></button>
+       <button class="opt" data-c="hear"><span class="k">4</span>
+         <span><b>На слух → перевод</b> 🔊<br><span class="small muted">слышишь «estou a ver» — выбираешь «я сейчас смотрю»</span></span></button>
      </div>
    </div>`;
   document.getElementById('back').onclick = home;
   document.querySelectorAll('[data-c]').forEach(b=> b.onclick = ()=>{
     const c = b.dataset.c;
-    const f = p => p.kind==='conj' && (c==='all' || (c==='irr') === !!p.irr);
-    startSession(f, c==='irr' ? 'Неправильные глаголы' : c==='reg' ? 'Правильные глаголы' : 'Времена и конструкции');
+    const f = c==='hear' ? (p => p.kind==='conjh')
+      : (p => p.kind==='conj' && (c==='all' || (c==='irr') === !!p.irr));
+    startSession(f, c==='hear' ? 'Спряжения на слух'
+      : c==='irr' ? 'Неправильные глаголы' : c==='reg' ? 'Правильные глаголы' : 'Времена и конструкции');
   });
 }
 

@@ -36,6 +36,28 @@ function makeQ(p){ if(p._pre) return p._pre;
     if(!v.impersonal) PERSONS[i].split(', ').forEach(pr=> q.answers.push(pr+' '+form));
     q.speakAfter=form;
   }
+  else if(p.kind==='conjh'){
+    const d = DATA.verbDrills[p.di];
+    const persons = [0,1,2,3,4];
+    const pers = rnd(persons);
+    const pt = ptPhrase(d, p.tense, pers);
+    const correct = ruPhrase(d, p.tense, pers);
+    const opts = [correct];
+    let guard = 0;
+    while(opts.length < 4 && guard++ < 60){
+      const t2 = rnd(['pres','estar','ir','pps'].filter(t=>
+        !(t==='estar' && !d.cont) && !(d.inf==='estar' && (t==='estar'||t==='ir'))));
+      const p2 = rnd(persons);
+      if(!ptPhrase(d, t2, p2)) continue;
+      const ru2 = ruPhrase(d, t2, p2);
+      if(!opts.includes(ru2)) opts.push(ru2);
+    }
+    q.type='choice'; q.label='Спряжение на слух — что это значит?';
+    q.prompt='🔊'; q.sub='прослушайте фразу и выберите перевод';
+    q.speakNow=pt; q.speakAfter=pt;
+    q.options=shuffle(opts); q.correct=correct;
+    q.rule = p.tense==='pres'?'pres_regulares':p.tense==='estar'?'estar_a':p.tense==='ir'?'ir_inf':'pps_regulares';
+  }
   else if(p.kind==='numw'){
     q.type='input'; q.label='Напишите число словами';
     q.prompt=String(p.n); q.answers=[numToPt(p.n)];

@@ -64,12 +64,16 @@ function conjMenu(){
          <span><b>Только правильные</b><br><span class="small muted">-ar / -er / -ir без сюрпризов · ${nReg} карточек</span></span></button>
        <button class="opt" data-c="irr"><span class="k">3</span>
          <span><b>Только неправильные</b><br><span class="small muted">ser, ir, fazer, pôr… и глаголы с чередованием (prefiro, durmo) · ${nIrr} карточек</span></span></button>
+       <button class="opt" data-c="hear"><span class="k">4</span>
+         <span><b>На слух → перевод</b> 🔊<br><span class="small muted">слышишь «estou a ver» — выбираешь «я сейчас смотрю»</span></span></button>
      </div>
    </div>`;
   document.getElementById('back').onclick = home;
   document.querySelectorAll('[data-c]').forEach(b=> b.onclick = ()=>{
     const c = b.dataset.c;
-    const f = p => p.kind==='conj' && (c==='all' || (c==='irr') === !!p.irr);
-    startSession(f, c==='irr' ? 'Неправильные глаголы' : c==='reg' ? 'Правильные глаголы' : 'Времена и конструкции');
+    const f = c==='hear' ? (p => p.kind==='conjh')
+      : (p => p.kind==='conj' && (c==='all' || (c==='irr') === !!p.irr));
+    startSession(f, c==='hear' ? 'Спряжения на слух'
+      : c==='irr' ? 'Неправильные глаголы' : c==='reg' ? 'Правильные глаголы' : 'Времена и конструкции');
   });
 }

@@ -149,6 +149,15 @@ function buildPool(){
                  rule: t==='pres'?'pres_regulares': t==='estar'?'estar_a': t==='ir'?'ir_inf':(v.pps&&DATA.ppsIrr.includes(v.inf)?'pps_irregulares':'pps_regulares')});
     });
   });
+  DATA.verbDrills.forEach((d,i)=>{
+    ['pres','estar','ir','pps'].forEach(t=>{
+      if(t==='estar' && !d.cont) return;
+      if(d.inf==='estar' && (t==='estar'||t==='ir')) return;
+      const v = DATA.verbs.find(x=>x.inf===d.inf);
+      if(t==='pps' && (!v || !v.pps)) return;
+      POOL.push({id:'ch'+i+t, kind:'conjh', di:i, tense:t, unit:d.unit, group:'conj', irr:!!(v&&v.irr)});
+    });
+  });
   NUM_SET.forEach(n=>{
     const unit = n<=50?1: n<=160?2: 4;
     POOL.push({id:'nw'+n, kind:'numw', n, unit, theme:'números', group:'rules'});
