@@ -235,6 +235,7 @@ function answer(q, given, skipped){
       html = `<div class="verdict no"><div class="big">${esc(target)}</div>`;
     }
   }
+  if(q.speakNow){ html += `<div class="ru" style="font-weight:600;font-size:16px">🔊 ${esc(q.speakNow)}</div>`; }
   if(q.hintLabel){ html += `<div class="ru">${esc(q.hintLabel)}</div>`; }
   if(q.p.kind==='trans' && q.p.i!==undefined){ const t=DATA.trans[q.p.i]; html += `<div class="ru">${esc(t.ru)}</div>`; }
   if(q.p.kind==='vocab' || q.p.kind==='gender'){ html += `<div class="ru">${esc(q.p.ru)}</div>`; }
