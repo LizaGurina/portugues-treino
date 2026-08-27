@@ -874,7 +874,7 @@ function startVerbDay(){
       steps.push({t:'peri', p, ru:q.ru, pt:q.pt, peri:pe, answers:q.answers});
     });
   }
-  SES = {queue: steps.map(s=>{ const q = ({
+  SES = {queue: shuffle(steps).map(s=>{ const q = ({
       p:{id:'vd-'+d.inf+'-'+s.t+'-'+s.p, kind:'trans', unit:d.unit, group:'trans',
          rule: s.t==='pres'?'pres_regulares':s.t==='estar'?'estar_a':s.t==='ir'?'ir_inf':'pps_regulares'},
       id:'vd-'+d.inf+'-'+s.t+'-'+s.p,
