@@ -127,7 +127,9 @@ function renderSession(){
   const n = SES.queue.length, prog = Math.round(SES.i/n*100);
   let body = '';
   const speakBtn = q.speakAfter||q.speakNow ? `<button class="speak" id="sp" title="Прослушать">🔊</button>` : '';
-  const head = `<div class="qtype">${esc(q.label)}${SES.repeat?' · повтор':''} ${speakBtn}</div>`;
+  const hintBtn = q.hintLabel
+    ? ` <button class="btn ghost" id="lblHint" style="padding:2px 10px;font-size:11px;border-radius:99px">показать подсказку</button>` : '';
+  const head = `<div class="qtype">${esc(q.label)}${SES.repeat?' · повтор':''} ${speakBtn}${hintBtn}</div>`;
 
   if(q.gap){
     body += `<div class="gapline">${q.gap.replace(/___/g,'<u>&nbsp;</u>')}</div>`;
@@ -161,6 +163,8 @@ function renderSession(){
     </div>`;
   document.getElementById('quit').onclick = ()=>{ SES=null; save(); home(); };
   const sp = document.getElementById('sp'); if(sp) sp.onclick = ()=> say(q.speakNow||q.speakAfter);
+  const lh = document.getElementById('lblHint');
+  if(lh) lh.onclick = ()=>{ lh.outerHTML = `<span style="color:var(--accent);font-weight:600">${esc(q.hintLabel)}</span>`; };
   if(q.speakNow) setTimeout(()=>say(q.speakNow), 250);
   if(q.type==='input'){
     const inp = document.getElementById('ans'); inp.focus();
@@ -231,6 +235,7 @@ function answer(q, given, skipped){
       html = `<div class="verdict no"><div class="big">${esc(target)}</div>`;
     }
   }
+  if(q.hintLabel){ html += `<div class="ru">${esc(q.hintLabel)}</div>`; }
   if(q.p.kind==='trans' && q.p.i!==undefined){ const t=DATA.trans[q.p.i]; html += `<div class="ru">${esc(t.ru)}</div>`; }
   if(q.p.kind==='vocab' || q.p.kind==='gender'){ html += `<div class="ru">${esc(q.p.ru)}</div>`; }
   html += `</div>`;

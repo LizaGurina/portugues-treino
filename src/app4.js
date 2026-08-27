@@ -197,9 +197,10 @@ function startVerbDay(drill){
          rule: s.t==='pres'?'pres_regulares':s.t==='estar'?'estar_a':s.t==='ir'?'ir_inf':'pps_regulares'},
       id:'vd-'+d.inf+'-'+s.t+'-'+s.p,
       type:'input', big:true,
-      label: s.t==='peri'
-        ? `Глагол дня: ${d.inf} · конструкция ${s.peri.id} + Infinitivo`
-        : `Глагол дня: ${d.inf} · ${TENSES[s.t].name}`,
+      label: 'Глагол дня',
+      hintLabel: s.t==='peri'
+        ? `${d.inf} · конструкция ${s.peri.id} + Infinitivo`
+        : `${d.inf} · ${TENSES[s.t].name}`,
       prompt: s.ru, answers: s.answers || ptVariants(s.pt),
       speakAfter: s.pt,
       rule: s.t==='peri' ? s.peri.rule
