@@ -48,3 +48,28 @@ function lexisTheme(key){
     startSession(p=> ids.has(p.id), t.icon+' '+t.ru, mode==='mix'? null : mode);
   });
 }
+
+/* ================= СПРЯЖЕНИЯ: ВЫБОР ГЛАГОЛОВ ================= */
+function conjMenu(){
+  buildPool();
+  const nIrr = POOL.filter(p=>p.kind==='conj' && p.irr).length;
+  const nReg = POOL.filter(p=>p.kind==='conj' && !p.irr).length;
+  document.getElementById('view').innerHTML = `
+   <div class="row" style="margin-bottom:14px"><button class="btn ghost" id="back">← назад</button></div>
+   <div class="card"><h2>Времена и конструкции</h2>
+     <div class="opts">
+       <button class="opt" data-c="all"><span class="k">1</span>
+         <span><b>Все глаголы</b><br><span class="small muted">${nReg+nIrr} карточек спряжения</span></span></button>
+       <button class="opt" data-c="reg"><span class="k">2</span>
+         <span><b>Только правильные</b><br><span class="small muted">-ar / -er / -ir без сюрпризов · ${nReg} карточек</span></span></button>
+       <button class="opt" data-c="irr"><span class="k">3</span>
+         <span><b>Только неправильные</b><br><span class="small muted">ser, ir, fazer, pôr… и глаголы с чередованием (prefiro, durmo) · ${nIrr} карточек</span></span></button>
+     </div>
+   </div>`;
+  document.getElementById('back').onclick = home;
+  document.querySelectorAll('[data-c]').forEach(b=> b.onclick = ()=>{
+    const c = b.dataset.c;
+    const f = p => p.kind==='conj' && (c==='all' || (c==='irr') === !!p.irr);
+    startSession(f, c==='irr' ? 'Неправильные глаголы' : c==='reg' ? 'Правильные глаголы' : 'Времена и конструкции');
+  });
+}

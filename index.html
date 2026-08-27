@@ -371,7 +371,7 @@ function buildPool(){
     ['pres','estar','ir','pps'].forEach(t=>{
       if(t==='pps' && !v.pps) return;
       if(v.impersonal && (t==='estar')) return;
-      POOL.push({id:'c'+i+t, kind:'conj', vi:i, tense:t, unit:v.unit, group:'conj',
+      POOL.push({id:'c'+i+t, kind:'conj', vi:i, tense:t, unit:v.unit, group:'conj', irr:!!v.irr,
                  rule: t==='pres'?'pres_regulares': t==='estar'?'estar_a': t==='ir'?'ir_inf':(v.pps&&DATA.ppsIrr.includes(v.inf)?'pps_irregulares':'pps_regulares')});
     });
   });
@@ -1275,6 +1275,31 @@ function lexisTheme(key){
   });
 }
 
+/* ================= СПРЯЖЕНИЯ: ВЫБОР ГЛАГОЛОВ ================= */
+function conjMenu(){
+  buildPool();
+  const nIrr = POOL.filter(p=>p.kind==='conj' && p.irr).length;
+  const nReg = POOL.filter(p=>p.kind==='conj' && !p.irr).length;
+  document.getElementById('view').innerHTML = `
+   <div class="row" style="margin-bottom:14px"><button class="btn ghost" id="back">← назад</button></div>
+   <div class="card"><h2>Времена и конструкции</h2>
+     <div class="opts">
+       <button class="opt" data-c="all"><span class="k">1</span>
+         <span><b>Все глаголы</b><br><span class="small muted">${nReg+nIrr} карточек спряжения</span></span></button>
+       <button class="opt" data-c="reg"><span class="k">2</span>
+         <span><b>Только правильные</b><br><span class="small muted">-ar / -er / -ir без сюрпризов · ${nReg} карточек</span></span></button>
+       <button class="opt" data-c="irr"><span class="k">3</span>
+         <span><b>Только неправильные</b><br><span class="small muted">ser, ir, fazer, pôr… и глаголы с чередованием (prefiro, durmo) · ${nIrr} карточек</span></span></button>
+     </div>
+   </div>`;
+  document.getElementById('back').onclick = home;
+  document.querySelectorAll('[data-c]').forEach(b=> b.onclick = ()=>{
+    const c = b.dataset.c;
+    const f = p => p.kind==='conj' && (c==='all' || (c==='irr') === !!p.irr);
+    startSession(f, c==='irr' ? 'Неправильные глаголы' : c==='reg' ? 'Правильные глаголы' : 'Времена и конструкции');
+  });
+}
+
 /* ---------- экраны ---------- */
 function counts(){
   buildPool();
@@ -1397,6 +1422,7 @@ function home(){
     const f = b.dataset.f;
     const RULEGRP = p => p.group==='rules';
     const PREP = p => p.rule && ['de_em_paises','prep_tempo','prep_movimento','para_por','em_meses','transportes','contracoes','lugar','prep_pronome','com_pronome','artigos'].includes(p.rule);
+    if(f==='conj'){ conjMenu(); return; }
     const map = {
       conj: p=>p.kind==='conj',
       trans: p=>p.kind==='trans',

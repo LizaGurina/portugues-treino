@@ -145,7 +145,7 @@ function buildPool(){
     ['pres','estar','ir','pps'].forEach(t=>{
       if(t==='pps' && !v.pps) return;
       if(v.impersonal && (t==='estar')) return;
-      POOL.push({id:'c'+i+t, kind:'conj', vi:i, tense:t, unit:v.unit, group:'conj',
+      POOL.push({id:'c'+i+t, kind:'conj', vi:i, tense:t, unit:v.unit, group:'conj', irr:!!v.irr,
                  rule: t==='pres'?'pres_regulares': t==='estar'?'estar_a': t==='ir'?'ir_inf':(v.pps&&DATA.ppsIrr.includes(v.inf)?'pps_irregulares':'pps_regulares')});
     });
   });

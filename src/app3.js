@@ -120,6 +120,7 @@ function home(){
     const f = b.dataset.f;
     const RULEGRP = p => p.group==='rules';
     const PREP = p => p.rule && ['de_em_paises','prep_tempo','prep_movimento','para_por','em_meses','transportes','contracoes','lugar','prep_pronome','com_pronome','artigos'].includes(p.rule);
+    if(f==='conj'){ conjMenu(); return; }
     const map = {
       conj: p=>p.kind==='conj',
       trans: p=>p.kind==='trans',
