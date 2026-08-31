@@ -183,6 +183,13 @@ function startVerbSection(d, mode){
         conj:{v, tense:t, person:p}});
     });
   }
+  // ter / estar: состояния (fome, sede, frio, dores…) во всех временах раздела
+  if((d.inf==='ter' || d.inf==='estar') && (mode==='pres' || mode==='pps')){
+    stateQuestions(d.inf, mode, 5).forEach(sq=>{
+      steps.push({label:`${d.inf} · состояния (ter / estar com)`, ru:sq.ru, pt:sq.pt,
+                  answers:sq.answers, rule:sq.rule});
+    });
+  }
   // возвратный близнец: в Presente подмешиваем chamo-me / vestes-te / …
   if(mode==='pres'){
     const twin = DATA.verbs.find(x=>x.inf===d.inf+'-se');

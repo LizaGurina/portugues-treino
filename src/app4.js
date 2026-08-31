@@ -214,6 +214,49 @@ function verbDayMenu(){
     startVerbDay(d);
   });
 }
+/* состояния: ter + nome / estar com + nome (fome, sede, frio, dores…) */
+const STATES = [
+ {pt:'fome',   k:'dat', ru:{pres:'хочется есть', pps:'хотелось есть', ir:'будет хотеться есть'}},
+ {pt:'sede',   k:'dat', ru:{pres:'хочется пить', pps:'хотелось пить', ir:'будет хотеться пить'}},
+ {pt:'frio',   k:'dat', ru:{pres:'холодно', pps:'было холодно', ir:'будет холодно'}},
+ {pt:'calor',  k:'dat', ru:{pres:'жарко', pps:'было жарко', ir:'будет жарко'}},
+ {pt:'medo',   k:'dat', ru:{pres:'страшно', pps:'было страшно', ir:'будет страшно'}},
+ {pt:'pressa', k:'u',   ru:{pres:'спешка — я спешу', pps:'была спешка', ir:'будет спешка'}},
+ {pt:'sorte',  k:'dat', ru:{pres:'везёт', pps:'повезло', ir:'повезёт'}},
+ {pt:'azar',   k:'dat', ru:{pres:'не везёт', pps:'не повезло', ir:'не повезёт'}},
+ {pt:'dores de cabeça',   k:'u', ru:{pres:'болит голова', pps:'болела голова', ir:'будет болеть голова'}},
+ {pt:'dores de barriga',  k:'u', ru:{pres:'болит живот', pps:'болел живот', ir:'будет болеть живот'}},
+ {pt:'dores de garganta', k:'u', ru:{pres:'болит горло', pps:'болело горло', ir:'будет болеть горло'}},
+ {pt:'dores de costas',   k:'u', ru:{pres:'болит спина', pps:'болела спина', ir:'будет болеть спина'}},
+];
+const RU_DAT = ['Мне','Тебе','Ей','Нам','Им'];
+const RU_U   = ['У меня','У тебя','У неё','У нас','У них'];
+function stateQuestions(primary, tense, n){
+  const vTer = DATA.verbs.find(x=>x.inf==='ter');
+  const vEstar = DATA.verbs.find(x=>x.inf==='estar');
+  const out = [];
+  shuffle(STATES).slice(0, n).forEach(st=>{
+    const p = Math.floor(Math.random()*5);
+    const terF = conjForm(vTer, tense, p);
+    const estF = conjForm(vEstar, tense, p);
+    if(!terF || !estF) return;
+    const terS = `${terF.charAt(0).toUpperCase()+terF.slice(1)} ${st.pt}.`;
+    const estS = `${estF.charAt(0).toUpperCase()+estF.slice(1)} com ${st.pt}.`;
+    const answers = [];
+    const order = primary==='estar' ? [ [estF, ' com'], [terF, ''] ] : [ [terF, ''], [estF, ' com'] ];
+    order.forEach(([f, com])=>{
+      const base = `${f} ${com? com.trim()+' ':''}${st.pt}.`.replace(/\s+/g,' ');
+      answers.push(base.charAt(0).toUpperCase()+base.slice(1));
+      PERSONS[p].split(', ').forEach(pr=> answers.push(`${pr} ${f}${com} ${st.pt}.`));
+    });
+    const subjRu = (st.k==='dat'? RU_DAT : RU_U)[p];
+    const mk = tense==='pps' ? rnd(PPS_MARKERS).ru+' ' : tense==='ir' ? 'Завтра ' : '';
+    const ru = `${mk}${mk? subjRu.toLowerCase() : subjRu} ${st.ru[tense==='estar'?'pres':tense] || st.ru.pres}.`;
+    out.push({ru, pt: primary==='estar'? estS : terS, answers,
+              hint:'ter + nome  ·  estar com + nome', rule:'estar_com_ter'});
+  });
+  return out;
+}
 function tensesForDrill(d){
   const v = DATA.verbs.find(x=>x.inf===d.inf);
   return ['pres','estar','ir','pps'].filter(t=>{
@@ -236,6 +279,15 @@ function startVerbDay(drill){
       steps.push({t, p, ru: ruPhrase(d,t,p,mk), pt});
     });
   });
+  // ter / estar: состояния во всех временах
+  if(d.inf==='ter' || d.inf==='estar'){
+    const stTenses = d.inf==='ter' ? ['pres','pps','ir'] : ['pres','pps'];
+    stTenses.forEach(t=>{
+      stateQuestions(d.inf, t, 1).forEach(sq=>{
+        steps.push({t:'state', ru:sq.ru, pt:sq.pt, answers:sq.answers, rule:sq.rule});
+      });
+    });
+  }
   // конструкции: 3 случайные, применимые к глаголу
   if(!v.impersonal && d.inf!=='estar'){
     const cands = PERIS.filter(pe =>
@@ -258,14 +310,14 @@ function startVerbDay(drill){
       id:'vd-'+d.inf+'-'+s.t+'-'+s.p,
       type:'input', big:true,
       label: 'Глагол дня',
-      hintLabel: s.t==='peri'
-        ? `${d.inf} · конструкция ${s.peri.id} + Infinitivo`
+      hintLabel: s.t==='state' ? `${d.inf} · состояние: ter + nome / estar com + nome`
+        : s.t==='peri' ? `${d.inf} · конструкция ${s.peri.id} + Infinitivo`
         : `${d.inf} · ${TENSES[s.t].name}`,
       prompt: s.ru, answers: s.answers || ptVariants(s.pt),
       speakAfter: s.pt,
-      rule: s.t==='peri' ? s.peri.rule
-        : (s.t==='pres'?'pres_regulares':s.t==='estar'?'estar_a':s.t==='ir'?'ir_inf':'pps_regulares'),
-      conj: s.t==='peri' ? null : {v, tense:s.t, person:s.p}
+      rule: s.rule || (s.t==='peri' ? s.peri.rule
+        : (s.t==='pres'?'pres_regulares':s.t==='estar'?'estar_a':s.t==='ir'?'ir_inf':'pps_regulares')),
+      conj: (s.t==='peri'||s.t==='state') ? null : {v, tense:s.t, person:s.p}
     }); q.p._pre = q; return q; }), i:0, right:0, wrong:0, again:[], log:[], title:'Глагол дня'};
   renderSession();
 }
