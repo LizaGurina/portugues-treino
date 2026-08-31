@@ -18,7 +18,8 @@ ok=true, если ответ грамматичен и по делу. Допус
 - иная, но корректная формулировка той же мысли.
 ok=false ТОЛЬКО при реальных ошибках: неверное спряжение или форма глагола, неверный предлог/артикль/род,
 пропущенная диакритика (cafe вместо café), не тот смысл, слова не по-португальски, бразилизмы вместо европейской нормы (в т.ч. gerúndio: estou falando).
-Отвечай ТОЛЬКО JSON: {"ok": true/false, "why": "одно короткое предложение по-русски", "fix": "минимально исправленный вариант ответа ученицы (пустая строка, если ошибок нет)"}`;
+Отвечай ТОЛЬКО JSON: {"ok": true/false, "why": "...", "fix": "минимально исправленный вариант ответа ученицы (пустая строка, если ошибок нет)"}
+Поле "why": если ошибок нет — одно предложение, почему вариант хорош. Если есть — перечисли ВСЕ ошибки, каждую с новой строки в формате «слово → исправление — короткое объяснение почему (род, спряжение, предлог и т.п.)». Не пропускай ни одной ошибки, включая согласование рода и числа.`;
 
 async function aiJudge(payload){
   const key = aiKey();
@@ -88,7 +89,7 @@ function aiSecondOpinion(q, given){
     }else{
       box.classList.add('no');
       box.innerHTML = `<div class="big" style="font-size:15px">🤖 AI подтверждает ошибку</div>
-        <div class="ru">${esc(res.why||'')}</div>
+        <div class="ru" style="white-space:pre-line">${esc(res.why||'')}</div>
         ${res.fix? `<div class="ru">исправление: <b>${esc(res.fix)}</b></div>`:''}`;
     }
   });
@@ -129,7 +130,7 @@ function aiDialogOpinion(step, text, onAccept){
     }else{
       box.classList.add('no');
       box.innerHTML = `<div class="big" style="font-size:15px">🤖 AI подтверждает: так не сказать</div>
-        <div class="ru">${esc(res.why||'')}</div>
+        <div class="ru" style="white-space:pre-line">${esc(res.why||'')}</div>
         ${res.fix? `<div class="ru">как можно: <b>${esc(res.fix)}</b></div>`:''}`;
     }
   });
@@ -165,7 +166,7 @@ function aiDialogVerify(step, text){
       if(a){ a.ok = false; a.missing = a.missing||[]; }
       box.classList.add('no');
       box.innerHTML = `<div class="big" style="font-size:15px">🤖 AI нашёл ошибку</div>
-        <div class="ru">${esc(res.why||'')}</div>
+        <div class="ru" style="white-space:pre-line">${esc(res.why||'')}</div>
         ${res.fix? `<div class="ru">правильно: <b>${esc(res.fix)}</b>
           <button class="speak" onclick="say('${esc(res.fix).replace(/'/g,"\\'")}')">🔊</button></div>`:''}`;
     }
