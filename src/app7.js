@@ -17,6 +17,7 @@ ok=true, если ответ грамматичен и по делу. Допус
 - стилистические варианты: quero/queria, por favor/faz favor/se faz favor, olá/bom dia, obrigado/obrigada;
 - иная, но корректная формулировка той же мысли.
 Регистр букв (заглавная/строчная) НЕ считается ошибкой — полностью игнорируй его и не упоминай.
+«Образец» — лишь ОДИН из многих верных вариантов, а не эталон. НИКОГДА не называй ошибкой «не совпадает с образцом», «не соблюдено согласование с образцом», «отличается от образца» и т.п. Каждая ошибка — только конкретная языковая: диакритика, род, число, спряжение, предлог, порядок слов, лексика.
 ok=false ТОЛЬКО при реальных ошибках: неверное спряжение или форма глагола, неверный предлог/артикль/род,
 пропущенная диакритика (cafe вместо café), не тот смысл, слова не по-португальски, бразилизмы вместо европейской нормы (в т.ч. gerúndio: estou falando).
 Отвечай ТОЛЬКО JSON: {"ok": true/false, "why": "...", "fix": "минимально исправленный вариант ответа ученицы (пустая строка, если ошибок нет)"}
@@ -67,7 +68,7 @@ function aiSecondOpinion(q, given){
   const taskRu = (q.gap ? q.gap.replace(/<[^>]+>/g,'') : (q.prompt||'').replace(/<[^>]+>/g,''));
   aiJudge({
     'задание': q.label + ': ' + taskRu + (q.hintLabel? ' ['+q.hintLabel+']':''),
-    'образец_ответа': q.answers ? q.answers[0] : q.correct,
+    'пример_верного_ответа': q.answers ? q.answers[0] : q.correct,
     'ответ_ученицы': given
   }).then(res=>{
     if(!res){ box.remove(); return; }
@@ -109,7 +110,7 @@ function aiDialogOpinion(step, text, onAccept){
     'ситуация': (DLG&&DLG.d? DLG.d.title+'. '+DLG.d.brief : ''),
     'собеседник_сказал': step.say,
     'задание': step.task,
-    'образец': step.model,
+    'пример_верного_ответа': step.model,
     'ответ_ученицы': text
   }).then(res=>{
     if(!res){ box.remove(); return; }
@@ -153,7 +154,7 @@ function aiDialogVerify(step, text){
     'ситуация': (DLG&&DLG.d? DLG.d.title+'. '+DLG.d.brief : ''),
     'собеседник_сказал': step.say,
     'задание': step.task,
-    'образец': step.model,
+    'пример_верного_ответа': step.model,
     'ответ_ученицы': text
   }).then(res=>{
     if(!res || res.err){ box.remove(); return; }
