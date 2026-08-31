@@ -167,6 +167,8 @@ function buildPool(){
     POOL.push({id:'hw'+t, kind:'horaw', t, unit:3, theme:'horas', group:'rules'});
     POOL.push({id:'hh'+t, kind:'horah', t, unit:3, theme:'horas', group:'rules'});
   });
+  DATA.complex.forEach((x,i)=>
+    POOL.push({id:'cx'+i, kind:'cx', i, unit:7, cxg:x.g, rule:x.rule, group:'trans'}));
   DATA.antonyms.forEach((x,i)=>
     POOL.push({id:'a'+i, kind:'anto', i, unit:7, theme:'antónimos', group:'vocab'}));
   DATA.gaps.forEach((x,i)=> POOL.push({id:'x'+i, kind:'gap', i, unit:x.unit, rule:x.rule, group:'rules'}));

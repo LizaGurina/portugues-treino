@@ -80,6 +80,12 @@ function makeQ(p){ if(p._pre) return p._pre;
     q.answers=horaDigits(p.t); q.speakNow=horaWords(p.t)[0];
     q.speakAfter=horaWords(p.t)[0]; q.rule='horas';
   }
+  else if(p.kind==='cx'){
+    const c = DATA.complex[p.i];
+    q.type='input'; q.big=true; q.label='Сложное предложение';
+    q.prompt=c.ru; q.answers=[c.pt, ...(c.alts||[])];
+    q.speakAfter=c.pt; q.rule=c.rule;
+  }
   else if(p.kind==='anto'){
     const a = DATA.antonyms[p.i];
     const fwd = Math.random()<.5;

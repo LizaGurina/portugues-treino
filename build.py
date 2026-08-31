@@ -5,7 +5,7 @@ import json, os, re, sys
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, os.path.join(HERE, 'src'))
 
-import verbs as V, vocab as VO, rules as R, items_gap as IG, items_trans as IT, lessons as L, stories as ST, dialogs as DG, themes as TH
+import verbs as V, vocab as VO, rules as R, items_gap as IG, items_trans as IT, lessons as L, stories as ST, dialogs as DG, themes as TH, items_complex as CX
 
 UNIT_NAMES = ["Olá! Eu sou a Ana.", "A tua amiga é muito simpática!", "Vamos almoçar?",
               "A vossa casa fica longe?", "Como vai estar o tempo?", "Estás melhor?",
@@ -44,6 +44,9 @@ def build_data():
         "dialogs": DG.DIALOGS,
         "themes": TH.THEMES,
         "antonyms": TH.ANTONYMS,
+        "complex": [{"g": g, "ru": ru, "pt": pt, "alts": alts, "rule": r}
+                    for g, ru, pt, alts, r in CX.COMPLEX],
+        "cxGroups": [{"key": k, "ru": ru, "d": d} for k, ru, d in CX.GROUPS],
     }
     for r, ru, pt, alts, u in IT.TRANS:
         alts = list(alts)
