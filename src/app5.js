@@ -63,7 +63,7 @@ function conjMenu(){
        <button class="opt" data-c="irr"><span class="k">2</span>
          <span><b>Случайный неправильный глагол</b><br><span class="small muted">ser, ir, fazer, pôr, dormir…</span></span></button>
        <button class="opt" data-c="pick"><span class="k">3</span>
-         <span><b>Выбрать глагол</b><br><span class="small muted">${DATA.verbDrills.length} глаголов со всеми разделами</span></span></button>
+         <span><b>Выбрать глагол</b><br><span class="small muted">все ${DATA.verbs.filter(v=>!v.impersonal).length} глаголов учебника</span></span></button>
        <button class="opt" data-c="pps4"><span class="k">4</span>
          <span><b>⚡ PPS: ser · ir · estar · ter</b><br><span class="small muted">четыре главных неправильных в прошедшем</span></span></button>
        <button class="opt" data-c="hear"><span class="k">5</span>
@@ -76,24 +76,36 @@ function conjMenu(){
     if(c==='hear'){ startSession(p=>p.kind==='conjh', 'Спряжения на слух'); return; }
     if(c==='pps4'){ startPps4(); return; }
     if(c==='pick'){ verbPick(); return; }
-    const pool = DATA.verbDrills.filter(d=> isIrrInf(d.inf) === (c==='irr'));
-    verbSections(rnd(pool));
+    const pool = DATA.verbs.filter(v=> !v.impersonal && !!v.irr === (c==='irr'));
+    verbSections(drillFor(rnd(pool).inf));
   });
 }
 
+const STATIVE = new Set(['ser','estar','ter','morar','gostar','querer','poder','saber','conhecer','preferir','doer','chover','nevar','haver']);
+function drillFor(inf){
+  const full = DATA.verbDrills.find(d=>d.inf===inf);
+  if(full) return Object.assign({full:true}, full);
+  const v = DATA.verbs.find(x=>x.inf===inf);
+  return { inf, unit:v.unit, obj:'', objRu:'',
+    ruInf: (v.ru||'').split(/[,(]/)[0].trim(),
+    cont: !STATIVE.has(inf) && !v.impersonal, full:false };
+}
 function verbPick(){
-  const list = [...DATA.verbDrills].sort((a,b)=>a.inf.localeCompare(b.inf));
+  const fullSet = new Set(DATA.verbDrills.map(d=>d.inf));
+  const list = DATA.verbs.filter(v=>!v.impersonal)
+    .sort((a,b)=> (fullSet.has(b.inf)-fullSet.has(a.inf)) || a.inf.localeCompare(b.inf));
   document.getElementById('view').innerHTML = `
    <div class="row" style="margin-bottom:14px"><button class="btn ghost" id="back">← назад</button></div>
-   <div class="card"><h2>Выберите глагол</h2>
+   <div class="card"><h2>Выберите глагол · ${list.length}</h2>
+     <p class="small muted" style="margin-top:-6px">⭐ — с полными фразами (дополнение, все виды заданий)</p>
      <div class="grid" style="grid-template-columns:repeat(auto-fit,minmax(130px,1fr))">
-       ${list.map((d,i)=>`<button class="mode" data-i="${DATA.verbDrills.indexOf(d)}">
-         <div class="t">${d.inf}${isIrrInf(d.inf)?' <span class="tag">неправ.</span>':''}</div>
-         <div class="d">${esc(d.ruInf||'')}</div></button>`).join('')}
+       ${list.map(v=>`<button class="mode" data-inf="${v.inf}">
+         <div class="t">${fullSet.has(v.inf)?'⭐ ':''}${v.inf}${v.irr?' <span class="tag">неправ.</span>':''}</div>
+         <div class="d">${esc(v.ru||'')}</div></button>`).join('')}
      </div>
    </div>`;
   document.getElementById('back').onclick = conjMenu;
-  document.querySelectorAll('[data-i]').forEach(b=> b.onclick = ()=> verbSections(DATA.verbDrills[+b.dataset.i]));
+  document.querySelectorAll('[data-inf]').forEach(b=> b.onclick = ()=> verbSections(drillFor(b.dataset.inf)));
 }
 
 function verbSections(d){
@@ -101,7 +113,8 @@ function verbSections(d){
   const hasPps = !!(v && v.pps);
   const nPeri = PERIS.filter(pe =>
     pe.id.split(' ')[0] !== d.inf && (!pe.needCont || d.cont) &&
-    (!pe.skill || SKILL_VERBS.has(d.inf)) && (!pe.usePres || d.ruPres)).length;
+    (!pe.skill || SKILL_VERBS.has(d.inf)) && (!pe.usePres || d.ruPres) &&
+    (!pe.recem || d.ruPastF)).length;
   document.getElementById('view').innerHTML = `
    <div class="row" style="margin-bottom:14px"><button class="btn ghost" id="back">← к выбору</button></div>
    <div class="card"><h2>${d.inf} — ${esc(d.ruInf||'')} ${isIrrInf(d.inf)?'<span class="tag">неправильный</span>':''}</h2>
@@ -134,6 +147,7 @@ function startVerbSection(d, mode){
     const cands = PERIS.filter(pe =>
       pe.id.split(' ')[0] !== d.inf && (!pe.needCont || d.cont) &&
       (!pe.skill || SKILL_VERBS.has(d.inf)) && (!pe.usePres || d.ruPres) &&
+      (!pe.recem || d.ruPastF) &&
       !(d.inf==='poder' && ['querer','conseguir','dever','queria (cortesia)'].includes(pe.id)) &&
       !(d.inf==='querer' && pe.id==='queria (cortesia)'));
     shuffle(cands).forEach(pe=>{
@@ -143,7 +157,7 @@ function startVerbSection(d, mode){
       steps.push({label:`${d.inf} · конструкция ${pe.id} + Infinitivo`, ru:q.ru, pt:q.pt,
                   answers:q.answers, rule:pe.rule});
     });
-  }else{
+  }else if(d.full){
     const t = mode;
     shuffle([0,1,2,3,4]).forEach(p=>{
       const mk = t==='pps' ? rnd(PPS_MARKERS) : null;
@@ -153,10 +167,28 @@ function startVerbSection(d, mode){
                   rule: t==='pres'?'pres_regulares':'pps_regulares',
                   conj:{v, tense:t, person:p}});
     });
+  }else{
+    // без полных фраз: карточки «лицо → форма» с красной подсказкой
+    const t = mode;
+    const SUBJ_LC = ['я','ты','она','мы','они'];
+    const MKW = {pres:'обычно', pps:'вчера'};
+    shuffle([0,1,2,3,4]).forEach(p=>{
+      const form = conjForm(v, t, p); if(!form) return;
+      const answers = [form];
+      PERSONS[p].split(', ').forEach(pr=> answers.push(pr+' '+form));
+      steps.push({label:`${d.inf} · ${TENSES[t].name}`, card:true,
+        prompt:`${PERSONS[p]} — <span style="color:var(--accent)">${d.inf}</span>`,
+        subHtml:`${esc(d.ruInf)} · <b style="color:var(--warn)">${TENSES[t].short} — ${MKW[t]} ${SUBJ_LC[p]}…</b>`,
+        answers, pt:form,
+        rule: t==='pres'?'pres_regulares':'pps_regulares',
+        conj:{v, tense:t, person:p}});
+    });
   }
   SES = {queue: steps.map((s,i)=>({
       id:'vs-'+d.inf+'-'+mode+'-'+i, p:{id:'vs-'+d.inf+'-'+mode+'-'+i, kind:'trans', unit:d.unit},
-      type:'input', big:true, label:s.label, prompt:s.ru,
+      type:'input', big:!s.card, label:s.label,
+      prompt: s.card ? s.prompt : s.ru,
+      subHtml: s.subHtml||null,
       answers:s.answers, speakAfter:s.pt, rule:s.rule, conj:s.conj||null
     })), i:0, right:0, wrong:0, again:[], log:[],
     title: d.inf+' · '+(mode==='peri'?'связки':mode==='pres'?'Presente':'PPS')};

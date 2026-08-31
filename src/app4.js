@@ -117,6 +117,7 @@ const SKILL_VERBS = new Set(['falar','ler','escrever','fazer','cozinhar','nadar'
 function infFor(v, p){
   return v.refl ? v.inf.slice(0,-2) + REFL[p] : v.inf;
 }
+function periClean(s){ return s.replace(/\s+/g,' ').replace(/ \./g,'.').trim(); }
 function periQuestion(d, v, peri, p){
   const inf = infFor(v, p);
   const pt = `${DATA.subjPt[p]==='Eu'&&!peri.pps?'':''}${peri.aux[p].charAt(0).toUpperCase()+peri.aux[p].slice(1)} ${inf} ${d.obj}.`;
@@ -133,7 +134,7 @@ function periQuestion(d, v, peri, p){
   const answers = ptVariants(pt);
   if(!answers.includes(withSubj)) answers.push(withSubj);
   if(peri.pps){ answers.push('Ontem, '+withSubj.charAt(0).toLowerCase()+withSubj.slice(1)); }
-  return {ru, pt, answers, peri};
+  return {ru: periClean(ru), pt: periClean(pt), answers: answers.map(periClean), peri};
 }
 function verbDayMenu(){
   buildPool();

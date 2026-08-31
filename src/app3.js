@@ -236,7 +236,7 @@ function setView(){
      <label class="set">Озвучка (pt-PT)
        <input type="checkbox" id="speak" ${s.speak?'checked':''}></label>
      <label class="set">AI-проверка ответов
-       <span class="small muted">${aiKey()? 'ключ сохранён ✓' : 'ключа нет'}</span></label>
+       <span class="small muted" id="aikStatus">${aiKey()? 'ключ сохранён: '+aiKey().slice(0,10)+'…' : 'ключа нет'}</span></label>
      <div class="row">
        <input class="answer" id="aik" type="password" placeholder="ключ OpenAI (sk-…)"
          value="" style="margin-top:0;font-size:14px;flex:1">
@@ -261,10 +261,19 @@ function setView(){
   document.getElementById('np').onchange = e=>{ s.newPerDay=+e.target.value; save(); };
   document.getElementById('strict').onchange = e=>{ s.strict=e.target.checked; save(); };
   document.getElementById('speak').onchange = e=>{ s.speak=e.target.checked; save(); };
-  document.getElementById('aikSave').onclick = ()=>{
-    const v = document.getElementById('aik').value.trim();
-    if(v) localStorage.setItem(AI_KEY_STORE, v); else localStorage.removeItem(AI_KEY_STORE);
-    setView(); };
+  document.getElementById('aikSave').onclick = async ()=>{
+    const v = document.getElementById('aik').value.replace(/\s+/g,'');
+    const st = document.getElementById('aikStatus');
+    if(!v){ localStorage.removeItem(AI_KEY_STORE); setView(); return; }
+    localStorage.setItem(AI_KEY_STORE, v);
+    st.textContent = 'проверяю ключ…';
+    try{
+      const r = await fetch('https://api.openai.com/v1/models', {headers:{'Authorization':'Bearer '+v}});
+      st.textContent = r.ok ? '✓ ключ работает ('+v.slice(0,10)+'…, '+v.length+' симв.)'
+        : '✗ ключ не принят ('+r.status+') — длина '+v.length+' симв., должно быть ~164';
+      st.style.color = r.ok ? 'var(--accent)' : 'var(--warn)';
+    }catch(e){ st.textContent = '✗ нет связи с api.openai.com'; st.style.color='var(--warn)'; }
+  };
   document.querySelectorAll('[data-u]').forEach(b=> b.onclick = ()=>{
     const u=+b.dataset.u;
     s.units = s.units.includes(u) ? s.units.filter(x=>x!==u) : [...s.units,u].sort();
