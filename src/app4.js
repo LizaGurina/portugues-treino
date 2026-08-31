@@ -103,6 +103,9 @@ const PERIS = [
  {id:'ajudar a', rule:null, needCont:true,
   aux:['ajudo a','ajudas a','ajuda a','ajudamos a','ajudam a'],
   ru:['Я помогаю','Ты помогаешь','Она помогает','Мы помогаем','Они помогают']},
+ {id:'acabar de', rule:null, needCont:true, recem:true,
+  aux:['acabo de','acabas de','acaba de','acabamos de','acabam de'],
+  ru:['Я только что','Ты только что','Она только что','Мы только что','Они только что']},
  {id:'queria (cortesia)', rule:'cortesia', persons:[0],
   aux:['queria','querias','queria','queríamos','queriam'],
   ru:['Я бы хотела','Ты бы хотел(а)','Она бы хотела','Мы бы хотели','Они бы хотели']},
@@ -117,8 +120,12 @@ function infFor(v, p){
 function periQuestion(d, v, peri, p){
   const inf = infFor(v, p);
   const pt = `${DATA.subjPt[p]==='Eu'&&!peri.pps?'':''}${peri.aux[p].charAt(0).toUpperCase()+peri.aux[p].slice(1)} ${inf} ${d.obj}.`;
+  const pastF = d.ruPastF||'', pastP = d.ruPastP||'';
+  const pastForm = p===0||p===2 ? pastF : (p===1 ? pastF.replace(/ла( |$)/,'л(а)$1') : pastP);
   const ru = peri.usePres
     ? `${DATA.subjRu[p]} обычно ${d.ruPres[p]} ${d.objRu}.`
+    : peri.recem
+    ? `${peri.ru[p]} ${pastForm} ${d.objRu}.`
     : `${peri.ru[p]} ${d.ruInf} ${d.objRu}${peri.id==='queria (cortesia)' ? ', пожалуйста' : ''}.`;
   // варианты: с местоимением впереди
   const subj = DATA.subjPt[p];

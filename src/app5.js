@@ -49,31 +49,143 @@ function lexisTheme(key){
   });
 }
 
-/* ================= СПРЯЖЕНИЯ: ВЫБОР ГЛАГОЛОВ ================= */
+/* ================= СПРЯЖЕНИЯ: ГЛАГОЛ → РАЗДЕЛЫ ================= */
+function isIrrInf(inf){ return !!(DATA.verbs.find(x=>x.inf===inf)||{}).irr; }
+
 function conjMenu(){
   buildPool();
-  const nIrr = POOL.filter(p=>p.kind==='conj' && p.irr).length;
-  const nReg = POOL.filter(p=>p.kind==='conj' && !p.irr).length;
   document.getElementById('view').innerHTML = `
    <div class="row" style="margin-bottom:14px"><button class="btn ghost" id="back">← назад</button></div>
    <div class="card"><h2>Времена и конструкции</h2>
      <div class="opts">
-       <button class="opt" data-c="all"><span class="k">1</span>
-         <span><b>Все глаголы</b><br><span class="small muted">${nReg+nIrr} карточек спряжения</span></span></button>
-       <button class="opt" data-c="reg"><span class="k">2</span>
-         <span><b>Только правильные</b><br><span class="small muted">-ar / -er / -ir без сюрпризов · ${nReg} карточек</span></span></button>
-       <button class="opt" data-c="irr"><span class="k">3</span>
-         <span><b>Только неправильные</b><br><span class="small muted">ser, ir, fazer, pôr… и глаголы с чередованием (prefiro, durmo) · ${nIrr} карточек</span></span></button>
-       <button class="opt" data-c="hear"><span class="k">4</span>
+       <button class="opt" data-c="reg"><span class="k">1</span>
+         <span><b>Случайный правильный глагол</b><br><span class="small muted">-ar / -er / -ir</span></span></button>
+       <button class="opt" data-c="irr"><span class="k">2</span>
+         <span><b>Случайный неправильный глагол</b><br><span class="small muted">ser, ir, fazer, pôr, dormir…</span></span></button>
+       <button class="opt" data-c="pick"><span class="k">3</span>
+         <span><b>Выбрать глагол</b><br><span class="small muted">${DATA.verbDrills.length} глаголов со всеми разделами</span></span></button>
+       <button class="opt" data-c="pps4"><span class="k">4</span>
+         <span><b>⚡ PPS: ser · ir · estar · ter</b><br><span class="small muted">четыре главных неправильных в прошедшем</span></span></button>
+       <button class="opt" data-c="hear"><span class="k">5</span>
          <span><b>На слух → перевод</b> 🔊<br><span class="small muted">слышишь «estou a ver» — выбираешь «я сейчас смотрю»</span></span></button>
      </div>
    </div>`;
   document.getElementById('back').onclick = home;
   document.querySelectorAll('[data-c]').forEach(b=> b.onclick = ()=>{
     const c = b.dataset.c;
-    const f = c==='hear' ? (p => p.kind==='conjh')
-      : (p => p.kind==='conj' && (c==='all' || (c==='irr') === !!p.irr));
-    startSession(f, c==='hear' ? 'Спряжения на слух'
-      : c==='irr' ? 'Неправильные глаголы' : c==='reg' ? 'Правильные глаголы' : 'Времена и конструкции');
+    if(c==='hear'){ startSession(p=>p.kind==='conjh', 'Спряжения на слух'); return; }
+    if(c==='pps4'){ startPps4(); return; }
+    if(c==='pick'){ verbPick(); return; }
+    const pool = DATA.verbDrills.filter(d=> isIrrInf(d.inf) === (c==='irr'));
+    verbSections(rnd(pool));
   });
+}
+
+function verbPick(){
+  const list = [...DATA.verbDrills].sort((a,b)=>a.inf.localeCompare(b.inf));
+  document.getElementById('view').innerHTML = `
+   <div class="row" style="margin-bottom:14px"><button class="btn ghost" id="back">← назад</button></div>
+   <div class="card"><h2>Выберите глагол</h2>
+     <div class="grid" style="grid-template-columns:repeat(auto-fit,minmax(130px,1fr))">
+       ${list.map((d,i)=>`<button class="mode" data-i="${DATA.verbDrills.indexOf(d)}">
+         <div class="t">${d.inf}${isIrrInf(d.inf)?' <span class="tag">неправ.</span>':''}</div>
+         <div class="d">${esc(d.ruInf||'')}</div></button>`).join('')}
+     </div>
+   </div>`;
+  document.getElementById('back').onclick = conjMenu;
+  document.querySelectorAll('[data-i]').forEach(b=> b.onclick = ()=> verbSections(DATA.verbDrills[+b.dataset.i]));
+}
+
+function verbSections(d){
+  const v = DATA.verbs.find(x=>x.inf===d.inf);
+  const hasPps = !!(v && v.pps);
+  const nPeri = PERIS.filter(pe =>
+    pe.id.split(' ')[0] !== d.inf && (!pe.needCont || d.cont) &&
+    (!pe.skill || SKILL_VERBS.has(d.inf)) && (!pe.usePres || d.ruPres)).length;
+  document.getElementById('view').innerHTML = `
+   <div class="row" style="margin-bottom:14px"><button class="btn ghost" id="back">← к выбору</button></div>
+   <div class="card"><h2>${d.inf} — ${esc(d.ruInf||'')} ${isIrrInf(d.inf)?'<span class="tag">неправильный</span>':''}</h2>
+     <div class="opts">
+       <button class="opt" data-s="pres"><span class="k">1</span>
+         <span><b>Настоящее · Presente do Indicativo</b><br><span class="small muted">все лица</span></span></button>
+       <button class="opt" data-s="peri"><span class="k">2</span>
+         <span><b>Связки · construções + Infinitivo</b><br><span class="small muted">${nPeri} конструкций: ir, querer, ter de, precisar de, dever, começar a, acabar de…</span></span></button>
+       <button class="opt" data-s="pps" ${hasPps?'':'disabled style="opacity:.4"'}><span class="k">3</span>
+         <span><b>Прошедшее · Pretérito Perfeito Simples (PPS)</b><br>
+         <span class="small muted">${hasPps?'все лица + маркеры времени':'в учебнике A1 PPS этого глагола не вводится'}</span></span></button>
+       <button class="opt" data-s="pps4"><span class="k">4</span>
+         <span><b>⚡ PPS: ser · ir · estar · ter</b><br><span class="small muted">отдельная разминка, не зависит от глагола</span></span></button>
+     </div>
+   </div>`;
+  document.getElementById('back').onclick = conjMenu;
+  document.querySelectorAll('[data-s]').forEach(b=> b.onclick = ()=>{
+    const m = b.dataset.s;
+    if(m==='pps4'){ startPps4(); return; }
+    if(m==='pps' && !hasPps) return;
+    startVerbSection(d, m);
+  });
+}
+
+/* раздел одного глагола: pres | pps | peri */
+function startVerbSection(d, mode){
+  const v = DATA.verbs.find(x=>x.inf===d.inf);
+  const steps = [];
+  if(mode==='peri'){
+    const cands = PERIS.filter(pe =>
+      pe.id.split(' ')[0] !== d.inf && (!pe.needCont || d.cont) &&
+      (!pe.skill || SKILL_VERBS.has(d.inf)) && (!pe.usePres || d.ruPres) &&
+      !(d.inf==='poder' && ['querer','conseguir','dever','queria (cortesia)'].includes(pe.id)) &&
+      !(d.inf==='querer' && pe.id==='queria (cortesia)'));
+    shuffle(cands).forEach(pe=>{
+      const ps = pe.persons || [0,1,2,3,4];
+      const p = ps[Math.floor(Math.random()*ps.length)];
+      const q = periQuestion(d, v, pe, p);
+      steps.push({label:`${d.inf} · конструкция ${pe.id} + Infinitivo`, ru:q.ru, pt:q.pt,
+                  answers:q.answers, rule:pe.rule});
+    });
+  }else{
+    const t = mode;
+    shuffle([0,1,2,3,4]).forEach(p=>{
+      const mk = t==='pps' ? rnd(PPS_MARKERS) : null;
+      const pt = ptPhrase(d,t,p,mk); if(!pt) return;
+      steps.push({label:`${d.inf} · ${TENSES[t].name}`, ru:ruPhrase(d,t,p,mk), pt,
+                  answers:ptVariants(pt),
+                  rule: t==='pres'?'pres_regulares':'pps_regulares',
+                  conj:{v, tense:t, person:p}});
+    });
+  }
+  SES = {queue: steps.map((s,i)=>({
+      id:'vs-'+d.inf+'-'+mode+'-'+i, p:{id:'vs-'+d.inf+'-'+mode+'-'+i, kind:'trans', unit:d.unit},
+      type:'input', big:true, label:s.label, prompt:s.ru,
+      answers:s.answers, speakAfter:s.pt, rule:s.rule, conj:s.conj||null
+    })), i:0, right:0, wrong:0, again:[], log:[],
+    title: d.inf+' · '+(mode==='peri'?'связки':mode==='pres'?'Presente':'PPS')};
+  renderSession();
+}
+
+/* ⚡ PPS-разминка: ser / ir / estar / ter */
+function startPps4(){
+  const infs = ['ser','ir','estar','ter'];
+  const SUBJ_LC = ['я','ты','она','мы','они'];
+  const qs = [];
+  infs.forEach(inf=>{
+    const v = DATA.verbs.find(x=>x.inf===inf);
+    const vi = DATA.verbs.indexOf(v);
+    shuffle([0,1,2,3,4]).slice(0,3).forEach(p=>{
+      const form = v.pps[p];
+      const answers = [form];
+      PERSONS[p].split(', ').forEach(pr=> answers.push(pr+' '+form));
+      qs.push({
+        id:'pps4-'+inf+'-'+p, p:{id:'pps4-'+inf+'-'+p, kind:'conj', unit:8, group:'conj'},
+        type:'input', label:TENSES.pps.name,
+        prompt:`${PERSONS[p]} — <span style="color:var(--accent)">${inf}</span>`,
+        subHtml:`<b style="color:var(--warn)">простое прошедшее — вчера ${SUBJ_LC[p]}…</b>`,
+        answers, speakAfter:form, rule:'pps_irregulares',
+        conj:{v, tense:'pps', person:p}
+      });
+    });
+  });
+  SES = {queue: shuffle(qs), i:0, right:0, wrong:0, again:[], log:[],
+         title:'⚡ PPS: ser · ir · estar · ter'};
+  renderSession();
 }

@@ -38,20 +38,23 @@ function home(){
       <button class="opt" id="lsVerb"><span class="k">1</span>
         <span><b>Глагол дня: ${vd.inf}</b>${mark('verb')}<br>
         <span class="small muted">одна фраза во всех лицах · ${tensesForDrill(vd).map(t=>TENSES[t].name).join(' · ')} · конструкции (ter de, costumar…)</span></span></button>
-      <button class="opt" id="lsLex"><span class="k">2</span>
+      <button class="opt" id="lsPps4"><span class="k">2</span>
+        <span><b>⚡ PPS: ser · ir · estar · ter</b>${mark('pps4')}<br>
+        <span class="small muted">ежедневная разминка: 12 форм прошедшего</span></span></button>
+      <button class="opt" id="lsLex"><span class="k">3</span>
         <span><b>📚 Лексика дня: ${th.icon} ${esc(th.ru)}</b>${mark('lex')}<br>
         <span class="small muted">слова темы · узнавание и ввод вперемешку</span></span></button>
-      <button class="opt" id="lsMain"><span class="k">3</span>
+      <button class="opt" id="lsMain"><span class="k">4</span>
         <span><b>Тренировка · ${S.set.len} заданий</b>${mark('main')}<br>
         <span class="small muted">повторения + спряжения, предлоги, артикли, перевод</span></span></button>
-      <button class="opt" id="lsStory"><span class="k">4</span>
+      <button class="opt" id="lsStory"><span class="k">5</span>
         <span><b>🗣 История: ${esc(st.title)}</b>${mark('story')}<br>
         <span class="small muted">разговорная практика · ${st.phrases.length} фраз · юнит ${st.unit}</span></span></button>
-      <button class="opt" id="lsDlg"><span class="k">5</span>
+      <button class="opt" id="lsDlg"><span class="k">6</span>
         <span><b>🗣 Диалог: ${dlg.icon} ${esc(dlg.title)}</b>${mark('dlg')}<br>
         <span class="small muted">разговорная практика · говорите вслух в микрофон</span></span></button>
     </div>
-    ${['verb','lex','main','story','dlg'].every(doneKey)
+    ${['verb','pps4','lex','main','story','dlg'].every(doneKey)
       ? `<button class="btn wide" id="finishLesson" style="margin-top:12px">✅ Завершить урок · открыть следующий</button>`
       : `<button class="btn ghost wide" id="finishLesson" style="margin-top:12px">Пропустить этот урок → следующий</button>`}
     <div class="bar"><i style="width:${pct}%"></i></div>
@@ -100,10 +103,11 @@ function home(){
   </div>`;
   document.getElementById('finishLesson').onclick = ()=>{
     S.lessonOffset = (S.lessonOffset||0) + 1;
-    ['verb','lex','main','story','dlg'].forEach(k=> delete S.hist['done-'+k]);
+    ['verb','pps4','lex','main','story','dlg'].forEach(k=> delete S.hist['done-'+k]);
     save(); home();
   };
   document.getElementById('lsVerb').onclick = ()=>{ S.hist['done-verb']=today(); save(); verbDayMenu(); };
+  document.getElementById('lsPps4').onclick = ()=>{ S.hist['done-pps4']=today(); save(); startPps4(); };
   document.getElementById('lsLex').onclick = ()=>{
     S.hist['done-lex']=today(); save();
     const ids = new Set(themePool(th).map(p=>p.id));
