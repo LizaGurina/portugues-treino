@@ -300,7 +300,7 @@ function checkUpdate(){
         if(document.getElementById('updChip')) return;
         const b = document.createElement('button');
         b.id='updChip'; b.className='btn';
-        b.style.cssText='position:fixed;bottom:18px;left:50%;transform:translateX(-50%);z-index:99;box-shadow:var(--shadow)';
+        b.style.cssText='position:fixed;top:14px;left:50%;transform:translateX(-50%);z-index:99;box-shadow:var(--shadow)';
         b.textContent = '⬆️ Доступна новая версия — обновить';
         b.onclick = ()=> location.reload();
         document.body.appendChild(b);
@@ -311,5 +311,6 @@ setTimeout(checkUpdate, 3000);
 setInterval(checkUpdate, 10*60*1000);
 
 /* ---------- старт ---------- */
+document.getElementById('topSet').onclick = ()=>{ if(SES){ SES=null; } setView(); };
 buildPool();
 home();

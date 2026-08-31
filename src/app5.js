@@ -332,3 +332,29 @@ function startImpSession(qsteps, title){
     })), i:0, right:0, wrong:0, again:[], log:[], title};
   renderSession();
 }
+
+/* ================= СЛОЖНЫЕ ПРЕДЛОЖЕНИЯ ================= */
+function complexMenu(){
+  buildPool();
+  document.getElementById('view').innerHTML = `
+   <div class="row" style="margin-bottom:14px"><button class="btn ghost" id="back">← назад</button></div>
+   <div class="card"><h2>Сложные предложения</h2>
+     <p class="small muted" style="margin-top:-6px">перевод целых фраз по конструкциям учебника</p>
+     <div class="opts">
+       ${DATA.cxGroups.map((g,i)=>{
+         const n = DATA.complex.filter(c=>c.g===g.key).length;
+         return `<button class="opt" data-g="${g.key}"><span class="k">${i+1}</span>
+           <span><b>${esc(g.ru)}</b><br><span class="small muted">${esc(g.d)} · ${n}</span></span></button>`;
+       }).join('')}
+       <button class="opt" data-g="__all"><span class="k">${DATA.cxGroups.length+1}</span>
+         <span><b>Всё вперемешку</b><br><span class="small muted">${DATA.complex.length} предложений</span></span></button>
+     </div>
+   </div>`;
+  document.getElementById('back').onclick = home;
+  document.querySelectorAll('[data-g]').forEach(b=> b.onclick = ()=>{
+    const g = b.dataset.g;
+    const f = g==='__all' ? (p=>p.kind==='cx') : (p=>p.kind==='cx' && p.cxg===g);
+    const t = g==='__all' ? 'Сложные предложения' : DATA.cxGroups.find(x=>x.key===g).ru;
+    startSession(f, t);
+  });
+}
