@@ -87,7 +87,7 @@ def main():
     if bad_rule:
         print("!! ссылки на несуществующие правила:", bad_rule)
     js = json.dumps(data, ensure_ascii=False, separators=(',', ':'))
-    parts = ['template_head.html', 'app6.js', 'app.js', 'app2.js', 'app4.js', 'app5.js', 'app3.js']
+    parts = ['template_head.html', 'app6.js', 'app.js', 'app7.js', 'app2.js', 'app4.js', 'app5.js', 'app3.js']
     import time
     out = open(os.path.join(HERE, 'src', parts[0]), encoding='utf-8').read().replace('/*__DATA__*/', js)
     out = out.replace("__BUILD__", time.strftime('%Y-%m-%d %H:%M:%S'))

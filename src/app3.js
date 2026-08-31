@@ -231,6 +231,14 @@ function setView(){
        <input type="checkbox" id="strict" ${s.strict?'checked':''}></label>
      <label class="set">Озвучка (pt-PT)
        <input type="checkbox" id="speak" ${s.speak?'checked':''}></label>
+     <label class="set">AI-проверка ответов
+       <span class="small muted">${aiKey()? 'ключ сохранён ✓' : 'ключа нет'}</span></label>
+     <div class="row">
+       <input class="answer" id="aik" type="password" placeholder="ключ OpenAI (sk-…)"
+         value="" style="margin-top:0;font-size:14px;flex:1">
+       <button class="btn ghost" id="aikSave">Сохранить</button>
+     </div>
+     <div class="small muted" style="margin-top:6px">Ключ хранится только в этом браузере. При ошибке ответ дополнительно проверяется AI на допустимость — не на дословное совпадение.</div>
    </div>
    <div class="card"><h2>Юниты в работе</h2>
      <div class="row">${[1,2,3,4,5,6,7,8].map(u=>
@@ -249,6 +257,10 @@ function setView(){
   document.getElementById('np').onchange = e=>{ s.newPerDay=+e.target.value; save(); };
   document.getElementById('strict').onchange = e=>{ s.strict=e.target.checked; save(); };
   document.getElementById('speak').onchange = e=>{ s.speak=e.target.checked; save(); };
+  document.getElementById('aikSave').onclick = ()=>{
+    const v = document.getElementById('aik').value.trim();
+    if(v) localStorage.setItem(AI_KEY_STORE, v); else localStorage.removeItem(AI_KEY_STORE);
+    setView(); };
   document.querySelectorAll('[data-u]').forEach(b=> b.onclick = ()=>{
     const u=+b.dataset.u;
     s.units = s.units.includes(u) ? s.units.filter(x=>x!==u) : [...s.units,u].sort();

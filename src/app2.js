@@ -244,6 +244,8 @@ function answer(q, given, skipped){
   if(q.rule) html += ruleRef(q.rule);
   html += `<div class="row" style="margin-top:14px"><button class="btn wide" id="next">Дальше →</button></div>`;
   document.getElementById('verdict').innerHTML = html;
+  if(!ok && !skipped && q.type==='input' && typeof aiSecondOpinion==='function')
+    aiSecondOpinion(q, given);
   if(q.speakAfter) say(q.speakAfter);
   const nx = document.getElementById('next');
   nx.focus();

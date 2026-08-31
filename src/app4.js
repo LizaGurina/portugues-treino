@@ -472,6 +472,12 @@ function judgeDialog(s, text){
       </div>`;
     document.getElementById('retry').onclick = ()=> renderDialogStep();
     document.getElementById('skipD').onclick = ()=>{ DLG.i++; renderDialogStep(); };
+    if(typeof aiDialogOpinion==='function') aiDialogOpinion(s, text, ()=>{
+      DLG.ok++;
+      const a = DLG.answers.slice(-1)[0];
+      if(a){ a.ok = true; a.aiAccepted = true; }
+      DLG.i++; renderDialogStep();
+    });
   }
 }
 function finishDialog(){
