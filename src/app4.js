@@ -615,6 +615,7 @@ function judgeDialog(s, text){
       <button class="btn wide" id="next" style="margin-top:12px">Дальше →</button>`;
     say(s.model);
     document.getElementById('next').onclick = ()=>{ DLG.i++; renderDialogStep(); };
+    if(typeof aiDialogVerify==='function') aiDialogVerify(s, text);
   }else{
     const d = wordDiff(text, bestModel);
     const head = missing.length

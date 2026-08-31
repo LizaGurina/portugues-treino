@@ -134,3 +134,40 @@ function aiDialogOpinion(step, text, onAccept){
     }
   });
 }
+
+/* AI-верификация ПРИНЯТОГО ответа в диалоге (принят по ключам, не дословно) */
+function aiDialogVerify(step, text){
+  if(!aiKey() || !text) return;
+  const models = [step.model, ...(step.models||[])];
+  if(models.some(m => canon(m) === canon(text))) return;   // дословное совпадение — AI не нужен
+  const v = document.getElementById('verdict');
+  if(!v) return;
+  const box = document.createElement('div');
+  box.className = 'verdict'; box.style.marginTop = '8px';
+  box.innerHTML = '<span class="small muted">🤖 проверяю грамматику…</span>';
+  const okBox = v.querySelector('.verdict.ok');
+  if(okBox && okBox.nextSibling) v.insertBefore(box, okBox.nextSibling); else v.appendChild(box);
+  aiJudge({
+    'ситуация': (DLG&&DLG.d? DLG.d.title+'. '+DLG.d.brief : ''),
+    'собеседник_сказал': step.say,
+    'задание': step.task,
+    'образец': step.model,
+    'ответ_ученицы': text
+  }).then(res=>{
+    if(!res || res.err){ box.remove(); return; }
+    if(res.ok){
+      box.innerHTML = `<span class="small" style="color:var(--accent)">🤖 AI подтверждает: грамматика верна${res.why? ' · '+esc(res.why):''}</span>`;
+    }else{
+      // честно понижаем вердикт
+      if(okBox){ okBox.classList.remove('ok'); okBox.classList.add('no'); }
+      DLG.ok = Math.max(0, DLG.ok-1);
+      const a = DLG.answers.slice(-1)[0];
+      if(a){ a.ok = false; a.missing = a.missing||[]; }
+      box.classList.add('no');
+      box.innerHTML = `<div class="big" style="font-size:15px">🤖 AI нашёл ошибку</div>
+        <div class="ru">${esc(res.why||'')}</div>
+        ${res.fix? `<div class="ru">правильно: <b>${esc(res.fix)}</b>
+          <button class="speak" onclick="say('${esc(res.fix).replace(/'/g,"\\'")}')">🔊</button></div>`:''}`;
+    }
+  });
+}
