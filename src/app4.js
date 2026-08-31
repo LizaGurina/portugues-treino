@@ -63,12 +63,12 @@ function ptVariants(pt){
 }
 /* глагольные конструкции из учебника: aux + (prep) + infinitivo */
 const PERIS = [
- {id:'ter de', rule:'ter_de', aux:['tenho de','tens de','tem de','temos de','têm de'],
+ {id:'ter de (obrigação)', rule:'ter_de', aux:['tenho de','tens de','tem de','temos de','têm de'],
   ru:['Я должна','Ты должен (должна)','Она должна','Мы должны','Они должны']},
- {id:'precisar de', rule:'precisar_dever', aux:['preciso de','precisas de','precisa de','precisamos de','precisam de'],
+ {id:'precisar de (necessidade)', rule:'precisar_dever', aux:['preciso de','precisas de','precisa de','precisamos de','precisam de'],
   ru:['Мне нужно','Тебе нужно','Ей нужно','Нам нужно','Им нужно']},
- {id:'dever', rule:'precisar_dever', aux:['devo','deves','deve','devemos','devem'],
-  ru:['Мне стоит','Тебе стоит','Ей стоит','Нам стоит','Им стоит']},
+ {id:'dever (obrigação moral)', rule:'precisar_dever', aux:['devo','deves','deve','devemos','devem'],
+  ru:['Мне следует','Тебе следует','Ей следует','Нам следует','Им следует']},
  {id:'costumar', rule:'costumar', aux:['costumo','costumas','costuma','costumamos','costumam'], usePres:true},
  {id:'gostar de', rule:null, aux:['gosto de','gostas de','gosta de','gostamos de','gostam de'],
   ru:['Я люблю','Ты любишь','Она любит','Мы любим','Они любят']},
@@ -103,6 +103,9 @@ const PERIS = [
  {id:'ajudar a', rule:null, needCont:true,
   aux:['ajudo a','ajudas a','ajuda a','ajudamos a','ajudam a'],
   ru:['Я помогаю','Ты помогаешь','Она помогает','Мы помогаем','Они помогают']},
+ {id:'continuar a', rule:null, needCont:true,
+  aux:['continuo a','continuas a','continua a','continuamos a','continuam a'],
+  ru:['Я продолжаю','Ты продолжаешь','Она продолжает','Мы продолжаем','Они продолжают']},
  {id:'acabar de', rule:null, needCont:true, recem:true,
   aux:['acabo de','acabas de','acaba de','acabamos de','acabam de'],
   ru:['Я только что','Ты только что','Она только что','Мы только что','Они только что']},
@@ -122,7 +125,8 @@ function periQuestion(d, v, peri, p){
   const inf = infFor(v, p);
   const pt = `${DATA.subjPt[p]==='Eu'&&!peri.pps?'':''}${peri.aux[p].charAt(0).toUpperCase()+peri.aux[p].slice(1)} ${inf} ${d.obj}.`;
   const pastF = d.ruPastF||'', pastP = d.ruPastP||'';
-  const pastForm = p===0||p===2 ? pastF : (p===1 ? pastF.replace(/ла( |$)/,'л(а)$1') : pastP);
+  let pastForm = p===0||p===2 ? pastF : (p===1 ? pastF.replace(/ла( |$)/,'л(а)$1') : pastP);
+  if(!pastForm) pastForm = ['закончила','закончил(а)','закончила','закончили','закончили'][p] + ' ' + (d.ruInf||'');
   const ru = peri.usePres
     ? `${DATA.subjRu[p]} обычно ${d.ruPres[p]} ${d.objRu}.`
     : peri.recem
@@ -191,7 +195,7 @@ function startVerbDay(drill){
       (!pe.needCont || d.cont) &&
       (!pe.skill || SKILL_VERBS.has(d.inf)) &&
       (!pe.usePres || d.ruPres) &&
-      !(d.inf==='poder' && ['querer','conseguir','dever','queria (cortesia)'].includes(pe.id)) &&
+      !(d.inf==='poder' && ['querer','conseguir','dever (obrigação moral)','queria (cortesia)'].includes(pe.id)) &&
       !(d.inf==='querer' && pe.id==='queria (cortesia)'));
     shuffle(cands).slice(0,5).forEach(pe=>{
       const ps = pe.persons || [0,1,2,3,4];

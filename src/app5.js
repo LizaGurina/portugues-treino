@@ -114,7 +114,7 @@ function verbSections(d){
   const nPeri = PERIS.filter(pe =>
     pe.id.split(' ')[0] !== d.inf && (!pe.needCont || d.cont) &&
     (!pe.skill || SKILL_VERBS.has(d.inf)) && (!pe.usePres || d.ruPres) &&
-    (!pe.recem || d.ruPastF)).length;
+    true).length;
   document.getElementById('view').innerHTML = `
    <div class="row" style="margin-bottom:14px"><button class="btn ghost" id="back">← к выбору</button></div>
    <div class="card"><h2>${d.inf} — ${esc(d.ruInf||'')} ${isIrrInf(d.inf)?'<span class="tag">неправильный</span>':''}</h2>
@@ -122,7 +122,7 @@ function verbSections(d){
        <button class="opt" data-s="pres"><span class="k">1</span>
          <span><b>Настоящее · Presente do Indicativo</b><br><span class="small muted">все лица</span></span></button>
        <button class="opt" data-s="peri"><span class="k">2</span>
-         <span><b>Связки · construções + Infinitivo</b><br><span class="small muted">${nPeri} конструкций: ir, querer, ter de, precisar de, dever, começar a, acabar de…</span></span></button>
+         <span><b>Связки · construções + Infinitivo</b><br><span class="small muted">${nPeri} конструкций: ir, querer, ter de (obrigação), precisar de (necessidade), dever (obrigação moral), começar a, acabar de, continuar a…</span></span></button>
        <button class="opt" data-s="pps" ${hasPps?'':'disabled style="opacity:.4"'}><span class="k">3</span>
          <span><b>Прошедшее · Pretérito Perfeito Simples (PPS)</b><br>
          <span class="small muted">${hasPps?'все лица + маркеры времени':'в учебнике A1 PPS этого глагола не вводится'}</span></span></button>
@@ -147,8 +147,7 @@ function startVerbSection(d, mode){
     const cands = PERIS.filter(pe =>
       pe.id.split(' ')[0] !== d.inf && (!pe.needCont || d.cont) &&
       (!pe.skill || SKILL_VERBS.has(d.inf)) && (!pe.usePres || d.ruPres) &&
-      (!pe.recem || d.ruPastF) &&
-      !(d.inf==='poder' && ['querer','conseguir','dever','queria (cortesia)'].includes(pe.id)) &&
+      !(d.inf==='poder' && ['querer','conseguir','dever (obrigação moral)','queria (cortesia)'].includes(pe.id)) &&
       !(d.inf==='querer' && pe.id==='queria (cortesia)'));
     shuffle(cands).forEach(pe=>{
       const ps = pe.persons || [0,1,2,3,4];
@@ -184,7 +183,24 @@ function startVerbSection(d, mode){
         conj:{v, tense:t, person:p}});
     });
   }
-  SES = {queue: steps.map((s,i)=>({
+  // возвратный близнец: в Presente подмешиваем chamo-me / vestes-te / …
+  if(mode==='pres'){
+    const twin = DATA.verbs.find(x=>x.inf===d.inf+'-se');
+    if(twin){
+      const SUBJ_LC = ['я','ты','она','мы','они'];
+      shuffle([0,1,2,3,4]).slice(0,3).forEach(p=>{
+        const form = conjForm(twin, 'pres', p); if(!form) return;
+        const answers = [form];
+        PERSONS[p].split(', ').forEach(pr=> answers.push(pr+' '+form));
+        steps.push({label:`${d.inf} · возвратная форма (-se)`, card:true,
+          prompt:`${PERSONS[p]} — <span style="color:var(--accent)">${twin.inf}</span>`,
+          subHtml:`${esc(twin.ru)} · <b style="color:var(--warn)">Presente — обычно ${SUBJ_LC[p]}… (себя)</b>`,
+          answers, pt:form, rule:'reflexos',
+          conj:{v:twin, tense:'pres', person:p}});
+      });
+    }
+  }
+  SES = {queue: shuffle(steps).map((s,i)=>({
       id:'vs-'+d.inf+'-'+mode+'-'+i, p:{id:'vs-'+d.inf+'-'+mode+'-'+i, kind:'trans', unit:d.unit},
       type:'input', big:!s.card, label:s.label,
       hintLabel: s.hintLabel||null,
