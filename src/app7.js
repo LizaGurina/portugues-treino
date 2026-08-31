@@ -60,7 +60,8 @@ function aiSecondOpinion(q, given){
   box.innerHTML = '<span class="small muted">🤖 спрашиваю AI, допустим ли ваш вариант…</span>';
   const v = document.getElementById('verdict');
   if(!v) return;
-  v.appendChild(box);
+  const anchor = v.querySelector('.ruleref');           // сразу под вердиктом, выше правил
+  if(anchor) v.insertBefore(box, anchor); else v.appendChild(box);
   const taskRu = (q.gap ? q.gap.replace(/<[^>]+>/g,'') : (q.prompt||'').replace(/<[^>]+>/g,''));
   aiJudge({
     'задание': q.label + ': ' + taskRu + (q.hintLabel? ' ['+q.hintLabel+']':''),
