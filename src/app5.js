@@ -154,8 +154,8 @@ function startVerbSection(d, mode){
       const ps = pe.persons || [0,1,2,3,4];
       const p = ps[Math.floor(Math.random()*ps.length)];
       const q = periQuestion(d, v, pe, p);
-      steps.push({label:`${d.inf} · конструкция ${pe.id} + Infinitivo`, ru:q.ru, pt:q.pt,
-                  answers:q.answers, rule:pe.rule});
+      steps.push({label:`${d.inf} · связки`, hintLabel:`конструкция ${pe.id} + Infinitivo`,
+                  ru:q.ru, pt:q.pt, answers:q.answers, rule:pe.rule});
     });
   }else if(d.full){
     const t = mode;
@@ -187,6 +187,7 @@ function startVerbSection(d, mode){
   SES = {queue: steps.map((s,i)=>({
       id:'vs-'+d.inf+'-'+mode+'-'+i, p:{id:'vs-'+d.inf+'-'+mode+'-'+i, kind:'trans', unit:d.unit},
       type:'input', big:!s.card, label:s.label,
+      hintLabel: s.hintLabel||null,
       prompt: s.card ? s.prompt : s.ru,
       subHtml: s.subHtml||null,
       answers:s.answers, speakAfter:s.pt, rule:s.rule, conj:s.conj||null
