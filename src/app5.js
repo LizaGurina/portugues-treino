@@ -126,7 +126,10 @@ function verbSections(d){
        <button class="opt" data-s="pps" ${hasPps?'':'disabled style="opacity:.4"'}><span class="k">3</span>
          <span><b>Прошедшее · Pretérito Perfeito Simples (PPS)</b><br>
          <span class="small muted">${hasPps?'все лица + маркеры времени':'в учебнике A1 PPS этого глагола не вводится'}</span></span></button>
-       <button class="opt" data-s="pps4"><span class="k">4</span>
+       <button class="opt" data-s="imp" ${impForms(d.inf)?'':'disabled style="opacity:.4"'}><span class="k">4</span>
+         <span><b>Императив · fala / não fales</b><br>
+         <span class="small muted">${impForms(d.inf)?'приказ и запрет: tu · você · vocês':'для этого глагола не тренируем'}</span></span></button>
+       <button class="opt" data-s="pps4"><span class="k">5</span>
          <span><b>⚡ PPS: ser · ir · estar · ter</b><br><span class="small muted">отдельная разминка, не зависит от глагола</span></span></button>
      </div>
    </div>`;
@@ -134,6 +137,7 @@ function verbSections(d){
   document.querySelectorAll('[data-s]').forEach(b=> b.onclick = ()=>{
     const m = b.dataset.s;
     if(m==='pps4'){ startPps4(); return; }
+    if(m==='imp'){ if(impForms(d.inf)) startImpSession(impQuestions(d.inf, 6), d.inf+' · Императив'); return; }
     if(m==='pps' && !hasPps) return;
     startVerbSection(d, m);
   });
@@ -219,24 +223,61 @@ function startVerbSection(d, mode){
   renderSession();
 }
 
-/* ⚡ PPS-разминка: ser / ir / estar / ter */
+/* ⚡ PPS-разминка: ser / ir / estar / ter — полными фразами */
+const PPS4 = {
+ ser: {objs:[{pt:['muito simpática','muito simpático'], ru:['очень любезна','очень любезен (любезна)','очень любезна','очень любезны','очень любезны'], plPt:['muito simpáticas','muito simpáticos']}],
+       ruV:['была','был(а)','была','были','были']},
+ ir:  {objs:[{pt:'ao cinema', ru:'в кино', v:'ход'}, {pt:'à praia', ru:'на пляж', v:'ход'},
+             {pt:'ao mercado', ru:'на рынок', v:'ход'}, {pt:'ao Porto', ru:'в Порту', v:'езд'}],
+       ruV:['ила','ил(а)','ила','или','или']},
+ estar:{objs:[{pt:'em casa', ru:'дома'}, {pt:'na praia', ru:'на пляже'},
+              {pt:'no hospital', ru:'в больнице'}, {pt:'em Lisboa', ru:'в Лиссабоне'}],
+       ruV:['была','был(а)','была','были','были']},
+ ter: {objs:[{pt:'aula de português', ru:'урок португальского', was:'был'},
+             {pt:'febre', ru:'температура', was:'была'},
+             {pt:'muito trabalho', ru:'много работы', was:'было'},
+             {pt:'uma reunião', ru:'встреча', was:'была'}]},
+};
 function startPps4(){
-  const infs = ['ser','ir','estar','ter'];
-  const SUBJ_LC = ['я','ты','она','мы','они'];
+  const RU_U2 = ['у меня','у тебя','у неё','у нас','у них'];
   const qs = [];
-  infs.forEach(inf=>{
+  ['ser','ir','estar','ter'].forEach(inf=>{
     const v = DATA.verbs.find(x=>x.inf===inf);
-    const vi = DATA.verbs.indexOf(v);
+    const cfg = PPS4[inf];
     shuffle([0,1,2,3,4]).slice(0,3).forEach(p=>{
       const form = v.pps[p];
-      const answers = [form];
+      const subj = DATA.subjPt[p], subjRu = DATA.subjRu[p];
+      const mk = rnd(PPS_MARKERS.filter(m=>!m.pos));
+      const o = rnd(cfg.objs);
+      let ru, full, full2=null;
+      if(inf==='ser'){
+        const adj = (p>=3? o.plPt : o.pt);
+        ru = `${mk.ru} ${subjRu.toLowerCase()} ${['была','был(а)','была','были','были'][p]} ${o.ru[p]}.`;
+        full = `${mk.pt}, ${subj.toLowerCase()} ${form} ${adj[0]}.`;
+        full2 = `${mk.pt}, ${subj.toLowerCase()} ${form} ${adj[1]}.`;
+      }else if(inf==='ir'){
+        ru = `${mk.ru} ${subjRu.toLowerCase()} ${o.v}${cfg.ruV[p]} ${o.ru}.`;
+        full = `${mk.pt}, ${subj.toLowerCase()} ${form} ${o.pt}.`;
+      }else if(inf==='estar'){
+        ru = `${mk.ru} ${subjRu.toLowerCase()} ${cfg.ruV[p]} ${o.ru}.`;
+        full = `${mk.pt}, ${subj.toLowerCase()} ${form} ${o.pt}.`;
+      }else{
+        ru = `${mk.ru} ${RU_U2[p]} ${o.was} ${o.ru}.`;
+        full = `${mk.pt}, ${subj.toLowerCase()} ${form} ${o.pt}.`;
+      }
+      const answers = [];
+      [full, full2].filter(Boolean).forEach(f=>{
+        answers.push(...ptVariants(f));
+        answers.push(f.replace(/^[^,]+, /,''));
+      });
+      answers.push(form);
       PERSONS[p].split(', ').forEach(pr=> answers.push(pr+' '+form));
       qs.push({
         id:'pps4-'+inf+'-'+p, p:{id:'pps4-'+inf+'-'+p, kind:'conj', unit:8, group:'conj'},
-        type:'input', label:TENSES.pps.name,
-        prompt:`${PERSONS[p]} — <span style="color:var(--accent)">${inf}</span>`,
-        subHtml:`<b style="color:var(--warn)">простое прошедшее — вчера ${SUBJ_LC[p]}…</b>`,
-        answers, speakAfter:form, rule:'pps_irregulares',
+        type:'input', big:true, label:TENSES.pps.name,
+        hintLabel: inf+' · PPS',
+        prompt: ru,
+        answers, speakAfter: full, rule:'pps_irregulares',
         conj:{v, tense:'pps', person:p}
       });
     });
@@ -246,28 +287,48 @@ function startPps4(){
   renderSession();
 }
 
-/* ================= СЛОЖНЫЕ ПРЕДЛОЖЕНИЯ ================= */
-function complexMenu(){
+/* ================= ВОПРОСИТЕЛЬНЫЕ СЛОВА ================= */
+function qwMenu(){
   buildPool();
   document.getElementById('view').innerHTML = `
    <div class="row" style="margin-bottom:14px"><button class="btn ghost" id="back">← назад</button></div>
-   <div class="card"><h2>Сложные предложения</h2>
-     <p class="small muted" style="margin-top:-6px">перевод целых фраз по конструкциям учебника</p>
+   <div class="card"><h2>❓ Вопросительные слова</h2>
      <div class="opts">
-       ${DATA.cxGroups.map((g,i)=>{
-         const n = DATA.complex.filter(c=>c.g===g.key).length;
-         return `<button class="opt" data-g="${g.key}"><span class="k">${i+1}</span>
+       ${DATA.qwGroups.map((g,i)=>{
+         const n = DATA.qw.filter(x=>x.g===g.key).length;
+         return `<button class="opt" data-q="${g.key}"><span class="k">${i+1}</span>
            <span><b>${esc(g.ru)}</b><br><span class="small muted">${esc(g.d)} · ${n}</span></span></button>`;
        }).join('')}
-       <button class="opt" data-g="__all"><span class="k">${DATA.cxGroups.length+1}</span>
-         <span><b>Всё вперемешку</b><br><span class="small muted">${DATA.complex.length} предложений</span></span></button>
+       <button class="opt" data-q="__all"><span class="k">${DATA.qwGroups.length+1}</span>
+         <span><b>Все вопросы вперемешку</b><br><span class="small muted">${DATA.qw.length} вопросов</span></span></button>
+       <button class="opt" data-q="__hear"><span class="k">${DATA.qwGroups.length+2}</span>
+         <span><b>На слух</b> 🔊<br><span class="small muted">слышишь вопрос — выбираешь, о чём спросили</span></span></button>
      </div>
    </div>`;
   document.getElementById('back').onclick = home;
-  document.querySelectorAll('[data-g]').forEach(b=> b.onclick = ()=>{
-    const g = b.dataset.g;
-    const f = g==='__all' ? (p=>p.kind==='cx') : (p=>p.kind==='cx' && p.cxg===g);
-    const t = g==='__all' ? 'Сложные предложения' : DATA.cxGroups.find(x=>x.key===g).ru;
-    startSession(f, t);
+  document.querySelectorAll('[data-q]').forEach(b=> b.onclick = ()=>{
+    const g = b.dataset.q;
+    const f = g==='__hear' ? (p=>p.kind==='qwh')
+      : g==='__all' ? (p=>p.kind==='qw')
+      : (p=>p.kind==='qw' && p.qwg===g);
+    const t = g==='__hear' ? 'Вопросы на слух'
+      : g==='__all' ? 'Вопросительные слова' : DATA.qwGroups.find(x=>x.key===g).ru;
+    startSession(f, '❓ '+t);
   });
+}
+
+/* ================= ИМПЕРАТИВ ================= */
+function impMenu(){
+  const verbs = DATA.verbs.filter(v=>impForms(v.inf)).map(v=>v.inf);
+  const qs = [];
+  shuffle(verbs).slice(0,5).forEach(inf=> qs.push(...impQuestions(inf, 4)));
+  startImpSession(shuffle(qs).slice(0,20), '❗ Императив · случайные глаголы');
+}
+function startImpSession(qsteps, title){
+  SES = {queue: qsteps.map((s,i)=>({
+      id:'imp-'+i+'-'+s.pt, p:{id:'imp-'+s.pt, kind:'conj', unit:6, group:'conj'},
+      type:'input', label:s.label, prompt:s.prompt, subHtml:s.subHtml,
+      answers:s.answers, speakAfter:s.pt, rule:s.rule
+    })), i:0, right:0, wrong:0, again:[], log:[], title};
+  renderSession();
 }

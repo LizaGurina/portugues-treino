@@ -5,7 +5,7 @@ import json, os, re, sys
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, os.path.join(HERE, 'src'))
 
-import verbs as V, vocab as VO, rules as R, items_gap as IG, items_trans as IT, lessons as L, stories as ST, dialogs as DG, themes as TH, items_complex as CX
+import verbs as V, vocab as VO, rules as R, items_gap as IG, items_trans as IT, lessons as L, stories as ST, dialogs as DG, themes as TH, items_complex as CX, items_questions as QW
 
 UNIT_NAMES = ["Olá! Eu sou a Ana.", "A tua amiga é muito simpática!", "Vamos almoçar?",
               "A vossa casa fica longe?", "Como vai estar o tempo?", "Estás melhor?",
@@ -39,14 +39,18 @@ def build_data():
                             ruPastF=pf, ruPastP=pp, cont=c, unit=u)
                        for i,o,oru,ri,rp,pf,pp,c,u in L.VERB_DRILLS],
         "subjRu": L.SUBJ_RU, "ruFut": L.RU_FUT, "subjPt": L.SUBJ_PT, "futRu": L.FUT_RU,
-        "stories": [dict(unit=u, title=t, phrases=[dict(ru=r, pt=p_, alts=a) for r,p_,a in ph])
-                    for u,t,ph in ST.STORIES],
+        "stories": [dict(unit=st[0], title=st[1],
+                         phrases=[dict(ru=r, pt=p_, alts=a) for r,p_,a in st[2]],
+                         slots=(st[3] if len(st) > 3 else None))
+                    for st in ST.STORIES],
         "dialogs": DG.DIALOGS,
         "themes": TH.THEMES,
         "antonyms": TH.ANTONYMS,
         "complex": [{"g": g, "ru": ru, "pt": pt, "alts": alts, "rule": r}
                     for g, ru, pt, alts, r in CX.COMPLEX],
         "cxGroups": [{"key": k, "ru": ru, "d": d} for k, ru, d in CX.GROUPS],
+        "qw": [{"g": g, "ru": ru, "pt": pt, "alts": alts} for g, ru, pt, alts in QW.QW],
+        "qwGroups": [{"key": k, "ru": ru, "d": d} for k, ru, d in QW.QW_GROUPS],
     }
     for r, ru, pt, alts, u in IT.TRANS:
         alts = list(alts)

@@ -167,6 +167,10 @@ function buildPool(){
     POOL.push({id:'hw'+t, kind:'horaw', t, unit:3, theme:'horas', group:'rules'});
     POOL.push({id:'hh'+t, kind:'horah', t, unit:3, theme:'horas', group:'rules'});
   });
+  DATA.qw.forEach((x,i)=>{
+    POOL.push({id:'qw'+i, kind:'qw', i, unit:3, qwg:x.g, group:'trans'});
+    POOL.push({id:'qh'+i, kind:'qwh', i, unit:3, qwg:x.g, group:'trans'});
+  });
   DATA.complex.forEach((x,i)=>
     POOL.push({id:'cx'+i, kind:'cx', i, unit:7, cxg:x.g, rule:x.rule, group:'trans'}));
   DATA.antonyms.forEach((x,i)=>

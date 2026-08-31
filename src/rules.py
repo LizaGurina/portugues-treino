@@ -184,11 +184,13 @@ RULES = [
   ("A Mariana está cansada porque trabalha muito.", "Мариана устала, потому что много работает."),
   ("Quando está sol, vamos correr à beira-mar.", "Когда солнечно, мы бегаем у моря.")]),
 
-("imperativo", 6, "Императив: informal (tu) и formal (você)",
+("imperativo", 6, "Императив: fala / não fales · fale · falem",
  "<b>tu</b>: берём форму 3 л. ед. ч. настоящего времени → <i>ele compra → Compra os medicamentos!</i><br>"
  "<b>você</b>: берём 1 л. ед. ч. и меняем окончание:<br>"
  "-ar → <b>-e</b>: eu procuro → <i>procure</i> · -er → <b>-a</b>: eu como → <i>coma</i> · "
- "-ir → <b>-a</b>: eu visto → <i>vista</i><br>"
+ "-ir → <b>-a</b>: eu visto → <i>vista</i>; vocês: <i>falem, comam, vistam</i><br>"
+ "<b>Запрет (não + …)</b>: на «ты» — та же формальная основа + s: <i>fala → não fales, come → não comas</i>; "
+ "для você/vocês — просто não + форма: <i>não fale, não falem</i>.<br>"
  "Глагол pôr идёт по правилу -er: eu ponho → <i>ponha</i>.",
  [("Fátima, procure a ficha do doente no arquivo.", "Фатима, найдите карту пациента в архиве."),
   ("Rita, coma alimentos mais saudáveis.", "Рита, ешьте более здоровую еду."),

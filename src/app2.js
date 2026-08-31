@@ -80,6 +80,20 @@ function makeQ(p){ if(p._pre) return p._pre;
     q.answers=horaDigits(p.t); q.speakNow=horaWords(p.t)[0];
     q.speakAfter=horaWords(p.t)[0]; q.rule='horas';
   }
+  else if(p.kind==='qw'){
+    const c = DATA.qw[p.i];
+    q.type='input'; q.big=true; q.label='Задайте вопрос';
+    q.prompt='Спросите: '+c.ru; q.answers=[c.pt, ...(c.alts||[])];
+    q.speakAfter=c.pt; q.rule='e_que';
+  }
+  else if(p.kind==='qwh'){
+    const c = DATA.qw[p.i];
+    q.type='choice'; q.label='Вопрос на слух — о чём спросили?';
+    q.prompt='🔊'; q.sub='прослушайте вопрос и выберите перевод';
+    q.speakNow=c.pt; q.speakAfter=c.pt;
+    const others = shuffle(DATA.qw.filter(x=>x.ru!==c.ru)).slice(0,3).map(x=>x.ru);
+    q.options=shuffle([c.ru, ...others]); q.correct=c.ru; q.rule='e_que';
+  }
   else if(p.kind==='cx'){
     const c = DATA.complex[p.i];
     q.type='input'; q.big=true; q.label='Сложное предложение';

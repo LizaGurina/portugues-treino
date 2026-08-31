@@ -72,6 +72,8 @@ function home(){
         <div class="d">de/em · a/para/por · слияния do/na/pelo</div></button>
       <button class="mode" data-f="rules"><div class="t">Грамматика</div>
         <div class="d">ser/estar · императив · местоимения · há/desde</div></button>
+      <button class="mode" id="toQw"><div class="t">❓ Вопросительные слова</div>
+        <div class="d">quem · o que · onde · quando · quanto · porque… + на слух</div></button>
       <button class="mode" id="toComplex"><div class="t">🧩 Сложные предложения</div>
         <div class="d">сравнение · tão/tanto · há…que/desde · alguém/ninguém · é que</div></button>
       <button class="mode" id="toNums"><div class="t">🔢 Числа и часы</div>
@@ -122,6 +124,7 @@ function home(){
   document.getElementById('toLexis').onclick = lexisList;
   document.getElementById('toNums').onclick = numbersMenu;
   document.getElementById('toComplex').onclick = complexMenu;
+  document.getElementById('toQw').onclick = qwMenu;
   document.getElementById('allStories').onclick = storiesList;
   document.querySelectorAll('[data-f]').forEach(b=> b.onclick = ()=>{
     const f = b.dataset.f;
