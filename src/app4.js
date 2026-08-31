@@ -5,6 +5,43 @@ function verbOfDay(){
   const drills = DATA.verbDrills.filter(d => S.set.units.includes(d.unit));
   return drills[lessonNum() % drills.length];
 }
+const TENSE_MARKERS = {
+ pres: [
+  {pt:'Todos os dias', ru:'Каждый день'},
+  {pt:'Ao fim de semana', ru:'По выходным'},
+  {pt:'Às vezes', ru:'Иногда'},
+  {pt:'Muitas vezes', ru:'Часто'},
+  {pt:'Poucas vezes', ru:'Редко'},
+  {pt:'Todo o dia', ru:'Весь день'},
+ ],
+ estar: [
+  {pt:'Agora', ru:'Сейчас'},
+  {pt:'Neste momento', ru:'В этот момент'},
+ ],
+ ir: [
+  {pt:'Amanhã', ru:'Завтра'},
+  {pt:'Depois', ru:'Потом'},
+  {pt:'Na próxima semana', ru:'На следующей неделе'},
+  {pt:'No próximo mês', ru:'В следующем месяце'},
+  {pt:'No próximo ano', ru:'В следующем году'},
+  {pt:'No próximo fim de semana', ru:'В следующие выходные'},
+ ],
+};
+const PPS_SUF_MARKERS = [
+  {pt:'pela primeira vez', ru:'в первый раз', pos:'suf'},
+  {pt:'pela segunda vez', ru:'во второй раз', pos:'suf'},
+  {pt:'pela terceira vez', ru:'в третий раз', pos:'suf'},
+];
+function markerFor(d, t){
+  if(t==='pps'){
+    const pool = d.cont ? PPS_MARKERS.concat(PPS_SUF_MARKERS) : PPS_MARKERS;
+    return rnd(pool);
+  }
+  if(!d.cont) return null;                       // стативы — без маркеров
+  const pool = TENSE_MARKERS[t] || [];
+  if(!pool.length) return null;
+  return Math.random() < 0.8 ? rnd(pool) : null; // иногда без маркера
+}
 const PPS_MARKERS = [
  {pt:'Ontem', ru:'Вчера'},
  {pt:'Na semana passada', ru:'На прошлой неделе'},
@@ -15,44 +52,55 @@ const PPS_MARKERS = [
 const U_SUBJ = ["У меня","У тебя","У неё","У нас","У них"];
 const BE_PAST = ["была","был(а)","была","были","были"];
 function ruPhrase(d, tense, p, mk){
-  mk = mk || PPS_MARKERS[0];
+  if(tense==='pps') mk = mk || PPS_MARKERS[0];
   const subj = DATA.subjRu[p];
   if(d.inf==='estar'){
     if(tense==='pres') return `${subj} сейчас ${d.objRu}.`;
-    return `${mk.ru} ${subj.toLowerCase()} ${BE_PAST[p]} ${d.objRu}.`;
+    return `${(mk||PPS_MARKERS[0]).ru} ${subj.toLowerCase()} ${BE_PAST[p]} ${d.objRu}.`;
   }
   if(d.inf==='ter'){
     if(tense==='pres') return `${U_SUBJ[p]} ${d.objRu}.`;
     if(tense==='ir') return `Завтра ${U_SUBJ[p].toLowerCase()} будет ${d.objRu}.`;
-    return `${mk.ru} ${U_SUBJ[p].toLowerCase()} был ${d.objRu}.`;
+    return `${(mk||PPS_MARKERS[0]).ru} ${U_SUBJ[p].toLowerCase()} был ${d.objRu}.`;
   }
-  if(tense==='pres') return `${subj} ${d.ruPres[p]} ${d.objRu}.`;
-  if(tense==='estar') return `${subj} сейчас ${d.ruPres[p]} ${d.objRu}.`;
+  const wrap = s2 => (s2).replace(/\s+/g,' ').replace(' .','.');
+  const preRu = (mk && mk.pos!=='suf' && ['pres','estar','ir'].includes(tense)) ? mk.ru+' ' : '';
+  const lc = s2 => preRu ? s2.toLowerCase() : s2;
+  if(tense==='pres') return wrap(`${preRu}${lc(subj)} ${d.ruPres[p]} ${d.objRu}.`);
+  if(tense==='estar'){
+    const cue = preRu || 'Сейчас ';
+    return wrap(`${cue}${subj.toLowerCase()} ${d.ruPres[p]} ${d.objRu}.`);
+  }
   if(tense==='ir'){
     const rf = DATA.ruFut[d.inf];
-    return rf ? `${subj} ${rf[p]} ${d.objRu}.` : `${subj} ${DATA.futRu[p]} ${d.ruInf} ${d.objRu}.`;
+    const core = rf ? `${lc(subj)} ${rf[p]} ${d.objRu}.` : `${lc(subj)} ${DATA.futRu[p]} ${d.ruInf} ${d.objRu}.`;
+    return wrap(preRu + core);
   }
   const v = p===0||p===2 ? d.ruPastF : (p===1 ? d.ruPastF.replace(/ла( |$)/,'л(а)$1') : d.ruPastP);
-  return `${mk.ru} ${subj.toLowerCase()} ${v} ${d.objRu}.`;
+  if(mk && mk.pos==='suf') return wrap(`${subj} ${v} ${d.objRu} ${mk.ru}.`);
+  return wrap(`${mk.ru} ${subj.toLowerCase()} ${v} ${d.objRu}.`);
 }
 function ptPhrase(d, tense, p, mk){
-  mk = mk || PPS_MARKERS[0];
+  if(tense==='pps') mk = mk || PPS_MARKERS[0];
   const v = DATA.verbs.find(x=>x.inf===d.inf);
   const f = conjForm(v, tense, p);
   if(!f) return null;
   const subj = DATA.subjPt[p];
-  let pre = '';
-  if(tense==='pps') pre = mk.pt + ', ';
-  if(tense==='ir' && d.inf==='ter') pre = 'Amanhã, ';
+  let pre = '', suf = '';
+  if(mk && mk.pos==='suf') suf = ' ' + mk.pt;
+  else if(tense==='pps') pre = mk.pt + ', ';
+  else if(mk && ['pres','estar','ir'].includes(tense)) pre = mk.pt + ', ';
+  else if(tense==='ir' && d.inf==='ter') pre = 'Amanhã, ';
   const sj = pre ? (subj==='Eu'?'eu':subj[0].toLowerCase()+subj.slice(1)) : subj;
-  return `${pre}${pre? sj.charAt(0)+sj.slice(1) : subj} ${f} ${d.obj}.`;
+  return (`${pre}${pre? sj : subj} ${f} ${d.obj}${suf}.`).replace(/\s+/g,' ').replace(' .','.');
 }
 function ptVariants(pt){
   const out = [pt];
-  const noAdv = pt.replace(/^(Ontem|Amanhã|Na semana passada|No mês passado|No ano passado|No fim de semana passado), /,'');
+  const MKPRE = /^(Ontem|Amanhã|Depois|Agora|Neste momento|Todos os dias|Todo o dia|Ao fim de semana|Às vezes|Muitas vezes|Poucas vezes|Na semana passada|No mês passado|No ano passado|No fim de semana passado|Na próxima semana|No próximo mês|No próximo ano|No próximo fim de semana), /i;
+  const noAdv = pt.replace(MKPRE,'').replace(/ pela (primeira|segunda|terceira) vez\./,'.');
   if(noAdv!==pt) out.push(noAdv.charAt(0).toUpperCase()+noAdv.slice(1));
   for(const base of [...out]){
-    const m = base.match(/^((?:Ontem|Amanhã|Na semana passada|No mês passado|No ano passado|No fim de semana passado), )?(eu|tu|ela|nós|eles)\s+(.+)$/i);
+    const m = base.match(/^((?:Ontem|Amanhã|Depois|Agora|Neste momento|Todos os dias|Todo o dia|Ao fim de semana|Às vezes|Muitas vezes|Poucas vezes|Na semana passada|No mês passado|No ano passado|No fim de semana passado|Na próxima semana|No próximo mês|No próximo ano|No próximo fim de semana), )?(eu|tu|ela|nós|eles)\s+(.+)$/i);
     if(m){
       const rest = m[3];
       const v = (m[1]||'') + rest.charAt(0).toUpperCase() + rest.slice(1);
@@ -183,7 +231,7 @@ function startVerbDay(drill){
   tenses.forEach(t=>{
     const ps = shuffle([0,1,2,3,4]).slice(0, t==='pres'?5:3);
     ps.forEach(p=>{
-      const mk = t==='pps' ? rnd(PPS_MARKERS) : null;
+      const mk = markerFor(d, t);
       const pt = ptPhrase(d,t,p,mk); if(!pt) return;
       steps.push({t, p, ru: ruPhrase(d,t,p,mk), pt});
     });
