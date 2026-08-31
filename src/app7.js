@@ -72,6 +72,16 @@ function aiSecondOpinion(q, given){
     if(res.err){ box.innerHTML = `<span class="small muted">🤖 ${esc(res.err)}</span>`; return; }
     if(res.ok){
       acceptAnswer(q);
+      const first = v.querySelector('.verdict.no');
+      if(first){
+        first.classList.remove('no'); first.classList.add('ok');
+        first.querySelectorAll('.wr').forEach(e=>{
+          e.style.cssText='color:inherit;text-decoration:none;font-weight:inherit';
+          e.classList.remove('wr');
+        });
+        const big = first.querySelector('.big');
+        if(big && !big.textContent.startsWith('✓')) big.insertAdjacentText('afterbegin','✓ ');
+      }
       box.classList.add('ok');
       box.innerHTML = `<div class="big" style="font-size:15px">🤖 Засчитано: ваш вариант допустим</div>
         <div class="ru">${esc(res.why||'')}</div>`;
@@ -103,6 +113,14 @@ function aiDialogOpinion(step, text, onAccept){
     if(!res){ box.remove(); return; }
     if(res.err){ box.innerHTML = `<span class="small muted">🤖 ${esc(res.err)}</span>`; return; }
     if(res.ok){
+      const first = v.querySelector('.verdict.no');
+      if(first){
+        first.classList.remove('no'); first.classList.add('ok');
+        first.querySelectorAll('.wr').forEach(e=>{
+          e.style.cssText='color:inherit;text-decoration:none;font-weight:inherit';
+          e.classList.remove('wr');
+        });
+      }
       box.classList.add('ok');
       box.innerHTML = `<div class="big" style="font-size:15px">🤖 Ответ уместен и корректен</div>
         <div class="ru">${esc(res.why||'')}</div>
