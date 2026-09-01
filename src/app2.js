@@ -149,7 +149,8 @@ function renderSession(){
   const speakBtn = q.speakAfter||q.speakNow ? `<button class="speak" id="sp" title="Прослушать">🔊</button>` : '';
   const hintBtn = q.hintLabel
     ? ` <button class="btn ghost" id="lblHint" style="padding:2px 10px;font-size:11px;border-radius:99px">показать подсказку</button>` : '';
-  const head = `<div class="qtype">${esc(q.label)}${SES.repeat?' · повтор':''} ${speakBtn}${hintBtn}</div>`;
+  const retryTag = (SES.retryOf===q.id) ? ' · исправление' : '';
+  const head = `<div class="qtype">${esc(q.label)}${SES.repeat?' · повтор':''}${retryTag} ${speakBtn}${hintBtn}</div>`;
 
   if(q.gap){
     body += `<div class="gapline">${q.gap.replace(/___/g,'<u>&nbsp;</u>')}</div>`;
@@ -169,7 +170,7 @@ function renderSession(){
     body += `<div class="opts">` + q.options.map((o,i)=>
       `<button class="opt" data-o="${esc(o)}"><span class="k">${i+1}</span>${esc(o)}</button>`).join('') + `</div>`;
   }
-  const dots = SES.queue.map((_,i)=>`<i class="${SES.log[i]===1?'done':SES.log[i]===0?'bad':''}"></i>`).join('');
+  const dots = SES.queue.map((_,i)=>`<i class="${SES.log[i]===1?'done':SES.log[i]===2?'fixed':SES.log[i]===0?'bad':''}"></i>`).join('');
   v.innerHTML = `
     <div class="card">
       <div style="display:flex;align-items:center;gap:10px">
@@ -207,20 +208,22 @@ function renderSession(){
 
 function answer(q, given, skipped){
   if(typeof stopDictation==='function') stopDictation();
+  const isRetry = SES && SES.retryOf === q.id;
   let res;
   if(q.type==='choice') res = {ok: !skipped && norm(given)===norm(q.correct), target:q.correct};
   else res = skipped ? {ok:false, target:q.answers[0]} : check(given, q.answers);
   if(skipped) res.ok = false;
   const ok = res.ok;
-  schedule(q.id, ok);
-  SES.log[SES.i] = ok?1:0;
+  if(!isRetry){ schedule(q.id, ok); SES.log[SES.i] = ok?1:0; }
+  else if(ok && SES.log[SES.i]===0){ SES.log[SES.i] = 2; }   // 2 = исправлено
   SES.answers = SES.answers || [];
   SES.answers.push({q: q.gap || q.prompt.replace(/<[^>]+>/g,''), given: (given||'').trim(),
                     target: res.target, ok, near: !!res.near});
-  ok ? SES.right++ : SES.wrong++;
-  if(!ok) SES.again.push(q.p);
-  const d = today(); S.hist[d] = S.hist[d] || {n:0,ok:0}; S.hist[d].n++; if(ok) S.hist[d].ok++;
-  if(isNewCounted(q.id)) S.newToday++;
+  if(!isRetry){ ok ? SES.right++ : SES.wrong++; if(!ok) SES.again.push(q.p); }
+  if(!isRetry){
+    const d = today(); S.hist[d] = S.hist[d] || {n:0,ok:0}; S.hist[d].n++; if(ok) S.hist[d].ok++;
+    if(isNewCounted(q.id)) S.newToday++;
+  }
   save();
 
   // визуальная разметка вариантов
@@ -262,15 +265,28 @@ function answer(q, given, skipped){
   html += `</div>`;
   if(q.conj) html += conjTable(q.conj);
   if(q.rule) html += ruleRef(q.rule);
-  html += `<div class="row" style="margin-top:14px"><button class="btn wide" id="next">Дальше →</button></div>`;
+  const canFix = !ok && q.type==='input';
+  html += canFix
+    ? `<div class="row" style="margin-top:14px">
+         <button class="btn" id="fixIt">✏️ Исправить</button>
+         <button class="btn ghost" id="next">Дальше →</button></div>`
+    : `<div class="row" style="margin-top:14px"><button class="btn wide" id="next">Дальше →</button></div>`;
   document.getElementById('verdict').innerHTML = html;
   if(!ok && !skipped && q.type==='input' && typeof aiSecondOpinion==='function')
     aiSecondOpinion(q, given);
   if(q.speakAfter) say(q.speakAfter);
+  const fx = document.getElementById('fixIt');
+  if(fx) fx.onclick = ()=>{
+    SES.retryOf = q.id;
+    document.onkeydown = null;
+    renderSession();
+    const inp2 = document.getElementById('ans');
+    if(inp2){ inp2.value = given || ''; inp2.focus(); inp2.select(); }
+  };
   const nx = document.getElementById('next');
   nx.focus();
   const armed = Date.now();
-  nx.onclick = ()=>{ if(Date.now()-armed < 700) return; SES.i++; document.onkeydown=null; renderSession(); };
+  nx.onclick = ()=>{ if(Date.now()-armed < 700) return; SES.retryOf=null; SES.i++; document.onkeydown=null; renderSession(); };
   document.onkeydown = e=>{ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); nx.click(); } };
 }
 function isNewCounted(id){ const m=S.items[id]; return m && m.r+m.w===1; }
