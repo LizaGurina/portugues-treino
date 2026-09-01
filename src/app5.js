@@ -248,14 +248,14 @@ function startVerbSection(d, mode){
       });
     }
   }
-  SES = {queue: shuffle(steps).map((s,i)=>({
+  SES = {queue: shuffle(steps).map((s,i)=>{ const q = ({
       id:'vs-'+d.inf+'-'+mode+'-'+i, p:{id:'vs-'+d.inf+'-'+mode+'-'+i, kind:'trans', unit:d.unit},
       type:'input', big:!s.card, label:s.label,
       hintLabel: s.hintLabel||null,
       prompt: s.card ? s.prompt : s.ru,
       subHtml: s.subHtml||null,
       answers:s.answers, speakAfter:s.pt, rule:s.rule, conj:s.conj||null
-    })), i:0, right:0, wrong:0, again:[], log:[],
+    }); q.p._pre = q; return q; }), i:0, right:0, wrong:0, again:[], log:[],
     title: d.inf+' · '+(mode==='peri'?'связки':mode==='pres'?'Presente':'PPS')};
   renderSession();
 }
@@ -309,14 +309,15 @@ function startPps4(){
       });
       answers.push(form);
       PERSONS[p].split(', ').forEach(pr=> answers.push(pr+' '+form));
-      qs.push({
+      const _q = {
         id:'pps4-'+inf+'-'+p, p:{id:'pps4-'+inf+'-'+p, kind:'conj', unit:8, group:'conj'},
         type:'input', big:true, label:TENSES.pps.name,
         hintLabel: inf+' · PPS',
         prompt: ru,
         answers, speakAfter: full, rule:'pps_irregulares',
         conj:{v, tense:'pps', person:p}
-      });
+      };
+      _q.p._pre = _q; qs.push(_q);
     });
   });
   SES = {queue: shuffle(qs), i:0, right:0, wrong:0, again:[], log:[],
@@ -362,11 +363,11 @@ function impMenu(){
   startImpSession(shuffle(qs).slice(0,20), '❗ Императив · случайные глаголы');
 }
 function startImpSession(qsteps, title){
-  SES = {queue: qsteps.map((s,i)=>({
+  SES = {queue: qsteps.map((s,i)=>{ const q = ({
       id:'imp-'+i+'-'+s.pt, p:{id:'imp-'+s.pt, kind:'conj', unit:6, group:'conj'},
       type:'input', label:s.label, prompt:s.prompt, subHtml:s.subHtml,
       answers:s.answers, speakAfter:s.pt, rule:s.rule
-    })), i:0, right:0, wrong:0, again:[], log:[], title};
+    }); q.p._pre = q; return q; }), i:0, right:0, wrong:0, again:[], log:[], title};
   renderSession();
 }
 

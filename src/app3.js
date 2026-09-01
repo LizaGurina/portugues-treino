@@ -312,5 +312,15 @@ setInterval(checkUpdate, 10*60*1000);
 
 /* ---------- старт ---------- */
 document.getElementById('topSet').onclick = ()=>{ if(SES){ SES=null; } setView(); };
+const dueChip = document.getElementById('dueChip');
+dueChip.style.cursor = 'pointer';
+dueChip.title = 'Повторить то, что пора';
+dueChip.onclick = ()=>{
+  buildPool();
+  const due = POOL.filter(p=>isDue(p.id));
+  if(!due.length){ alert('Сейчас нечего повторять — всё по расписанию.'); return; }
+  const ids = new Set(due.map(p=>p.id));
+  startSession(p=>ids.has(p.id), '🔁 Повторение');
+};
 buildPool();
 home();
