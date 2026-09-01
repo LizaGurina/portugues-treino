@@ -15,7 +15,7 @@ QW = [
 ("pessoas", "Кому вы вчера звонили? (вежливо, к одному)", "A quem é que telefonou ontem?", ["A quem telefonou ontem?", "A quem é que o senhor telefonou ontem?"]),
 
 # --- Что / какой: o que / qual / que ---
-("oque", "Чем ты занимаешься? (профессия)", "O que fazes?", ["O que é que fazes?", "O que é que tu fazes?"]),
+("oque", "Чем ты занимаешься? (профессия)", "O que fazes?", ["O que é que fazes?", "O que é que tu fazes?", "Qual é a tua profissão?", "Em que trabalhas?", "Em que é que trabalhas?"]),
 ("oque", "Что ты любишь делать?", "O que gostas de fazer?", ["O que é que gostas de fazer?"]),
 ("oque", "Что вы будете делать сегодня вечером? (вы — несколько человек)", "O que vão fazer hoje à noite?", ["O que é que vocês vão fazer hoje à noite?", "O que vocês vão fazer hoje à noite?"]),
 ("oque", "Что это?", "O que é isto?", []),
