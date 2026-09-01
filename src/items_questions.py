@@ -11,15 +11,16 @@ QW = [
 ("pessoas", "Чьи это ключи?", "De quem são estas chaves?", []),
 ("pessoas", "С кем ты идёшь в кино?", "Com quem vais ao cinema?", ["Com quem é que vais ao cinema?", "Com quem é que tu vais ao cinema?"]),
 ("pessoas", "С кем она живёт?", "Com quem é que ela mora?", ["Com quem mora ela?", "Com quem ela mora?"]),
-("pessoas", "Кому вы вчера звонили?", "A quem é que vocês telefonaram ontem?", ["A quem telefonaram ontem?", "A quem é que telefonaram ontem?"]),
+("pessoas", "Кому вы вчера звонили? (вы — несколько человек)", "A quem é que vocês telefonaram ontem?", ["A quem telefonaram ontem?", "A quem é que telefonaram ontem?", "A quem é que vocês ligaram ontem?"]),
+("pessoas", "Кому вы вчера звонили? (вежливо, к одному)", "A quem é que telefonou ontem?", ["A quem telefonou ontem?", "A quem é que o senhor telefonou ontem?"]),
 
 # --- Что / какой: o que / qual / que ---
 ("oque", "Чем ты занимаешься? (профессия)", "O que fazes?", ["O que é que fazes?", "O que é que tu fazes?"]),
 ("oque", "Что ты любишь делать?", "O que gostas de fazer?", ["O que é que gostas de fazer?"]),
-("oque", "Что вы будете делать сегодня вечером?", "O que vão fazer hoje à noite?", ["O que é que vocês vão fazer hoje à noite?", "O que vocês vão fazer hoje à noite?"]),
+("oque", "Что вы будете делать сегодня вечером? (вы — несколько человек)", "O que vão fazer hoje à noite?", ["O que é que vocês vão fazer hoje à noite?", "O que vocês vão fazer hoje à noite?"]),
 ("oque", "Что это?", "O que é isto?", []),
 ("oque", "Какая у тебя профессия?", "Qual é a tua profissão?", []),
-("oque", "Какой у вас номер телефона?", "Qual é o seu número de telefone?", []),
+("oque", "Какой у вас номер телефона? (вежливо, к одному)", "Qual é o seu número de telefone?", ["Qual é o número de telefone do senhor?"]),
 ("oque", "Который час?", "Que horas são?", []),
 ("oque", "Какой сегодня день?", "Que dia é hoje?", []),
 ("oque", "Сколько вам лет? (вежливо)", "Que idade tem?", ["Quantos anos tem?"]),
@@ -49,11 +50,12 @@ QW = [
 ("quanto", "На скольких языках она говорит?", "Quantas línguas é que ela fala?", ["Quantas línguas fala ela?", "Quantas línguas ela fala?"]),
 ("quanto", "Сколько времени это занимает?", "Quanto tempo demora?", ["Quanto tempo é que demora?"]),
 ("quanto", "Как давно ты живёшь в Португалии?", "Há quanto tempo vives em Portugal?", ["Há quanto tempo é que vives em Portugal?", "Há quanto tempo é que tu vives em Portugal?"]),
-("quanto", "Как давно вы работаете в больнице?", "Há quanto tempo trabalha no hospital?", ["Há quanto tempo é que trabalha no hospital?"]),
+("quanto", "Как давно вы работаете в больнице? (вежливо, к одному)", "Há quanto tempo trabalha no hospital?", ["Há quanto tempo é que trabalha no hospital?"]),
+("quanto", "Как давно вы работаете в больнице? (вы — несколько человек)", "Há quanto tempo trabalham no hospital?", ["Há quanto tempo é que vocês trabalham no hospital?"]),
 
 # --- Как: como / que tal ---
 ("como", "Как тебя зовут?", "Como te chamas?", ["Como é que te chamas?", "Como é que tu te chamas?"]),
-("como", "Как вас зовут?", "Como se chama?", ["Como é que se chama?", "Como é que o senhor se chama?"]),
+("como", "Как вас зовут? (вежливо, к одному)", "Como se chama?", ["Como é que se chama?", "Como é que o senhor se chama?", "Como é que a senhora se chama?"]),
 ("como", "Как ты? (разговорно)", "Que tal estás?", ["Como estás?", "Tudo bem?"]),
 ("como", "Какая она? (внешность, характер)", "Como é ela?", ["Como é que ela é?"]),
 ("como", "Как ты добираешься до работы?", "Como vais para o trabalho?", ["Como é que vais para o trabalho?"]),
@@ -66,13 +68,13 @@ QW = [
 
 # --- Да/нет: posso / pode / queres / tens / és / estás ---
 ("simnao", "Можно открыть окно?", "Posso abrir a janela?", []),
-("simnao", "Можете повторить, пожалуйста?", "Pode repetir, por favor?", ["Podia repetir, por favor?"]),
-("simnao", "Не могли бы вы сказать, где вокзал?", "Podia dizer-me onde fica a estação?", ["Pode dizer-me onde fica a estação?"]),
+("simnao", "Можете повторить, пожалуйста? (вежливо, к одному)", "Pode repetir, por favor?", ["Podia repetir, por favor?"]),
+("simnao", "Не могли бы вы сказать, где вокзал? (вежливо, к одному)", "Podia dizer-me onde fica a estação?", ["Pode dizer-me onde fica a estação?"]),
 ("simnao", "Хочешь пойти с нами в кино?", "Queres vir ao cinema connosco?", ["Queres ir ao cinema connosco?"]),
 ("simnao", "У тебя есть братья и сёстры?", "Tens irmãos?", ["Tu tens irmãos?", "Tens irmãos e irmãs?"]),
 ("simnao", "Ты замужем или нет?", "És casada ou solteira?", ["É casada ou solteira?"]),
 ("simnao", "Ты устала?", "Estás cansada?", ["Tu estás cansada?"]),
-("simnao", "Вы женаты?", "É casado?", ["O senhor é casado?"]),
+("simnao", "Вы женаты? (вежливо, к одному)", "É casado?", ["O senhor é casado?"]),
 ]
 
 QW_GROUPS = [

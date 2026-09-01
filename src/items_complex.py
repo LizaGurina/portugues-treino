@@ -73,7 +73,7 @@ COMPLEX = [
 ("eque", "Как тебя зовут?", "Como é que te chamas?", ["Como te chamas?"], "e_que"),
 ("eque", "Во сколько начинается урок?", "A que horas é que começa a aula?", ["A que horas começa a aula?"], "e_que"),
 ("eque", "Почему ты не идёшь с нами?", "Porque é que não vens connosco?", ["Porque não vens connosco?"], "e_que"),
-("eque", "Что вы будете делать в выходные?", "O que é que vocês vão fazer no fim de semana?", ["O que vão fazer no fim de semana?"], "e_que"),
+("eque", "Что вы будете делать в выходные? (вы — несколько человек)", "O que é que vocês vão fazer no fim de semana?", ["O que vão fazer no fim de semana?"], "e_que"),
 ("eque", "Откуда она?", "De onde é que ela é?", ["De onde é ela?", "De onde ela é?"], "e_que"),
 ]
 
