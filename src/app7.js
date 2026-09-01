@@ -34,7 +34,7 @@ async function aiJudge(payload){
       method:'POST',
       headers:{'Content-Type':'application/json','Authorization':'Bearer '+key},
       body: JSON.stringify({
-        model:'gpt-4o-mini', temperature:0,
+        model:'gpt-4o', temperature:0,
         response_format:{type:'json_object'},
         messages:[{role:'system',content:AI_SYS},{role:'user',content:JSON.stringify(payload)}]
       })
