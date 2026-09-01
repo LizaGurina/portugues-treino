@@ -20,7 +20,7 @@ QW = [
 ("oque", "Что вы будете делать сегодня вечером? (вы — несколько человек)", "O que vão fazer hoje à noite?", ["O que é que vocês vão fazer hoje à noite?", "O que vocês vão fazer hoje à noite?"]),
 ("oque", "Что это?", "O que é isto?", []),
 ("oque", "Какая у тебя профессия?", "Qual é a tua profissão?", []),
-("oque", "Какой у вас номер телефона? (вежливо, к одному)", "Qual é o seu número de telefone?", ["Qual é o número de telefone do senhor?"]),
+("oque", "Какой у вас номер телефона? (вежливо, к одному)", "Qual é o seu número de telemóvel?", ["Qual é o seu número de telefone?", "Qual é o número de telemóvel do senhor?", "Qual é o número de telefone do senhor?"]),
 ("oque", "Который час?", "Que horas são?", []),
 ("oque", "Какой сегодня день?", "Que dia é hoje?", []),
 ("oque", "Сколько вам лет? (вежливо)", "Que idade tem?", ["Quantos anos tem?"]),
