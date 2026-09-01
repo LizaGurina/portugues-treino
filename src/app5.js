@@ -94,20 +94,57 @@ function verbPick(){
   const fullSet = new Set(DATA.verbDrills.map(d=>d.inf));
   const list = DATA.verbs.filter(v=>!v.impersonal)
     .sort((a,b)=> (fullSet.has(b.inf)-fullSet.has(a.inf)) || a.inf.localeCompare(b.inf));
+  const card = v => `<button class="mode" data-inf="${v.inf}">
+      <div class="t">${fullSet.has(v.inf)?'⭐ ':''}${v.inf}${v.irr?' <span class="tag">неправ.</span>':''}</div>
+      <div class="d">${esc(v.ru||'')}</div></button>`;
   document.getElementById('view').innerHTML = `
    <div class="row" style="margin-bottom:14px"><button class="btn ghost" id="back">← назад</button></div>
    <div class="card"><h2>Выберите глагол · ${list.length}</h2>
-     <p class="small muted" style="margin-top:-6px">⭐ — с полными фразами (дополнение, все виды заданий)</p>
-     <div class="grid" style="grid-template-columns:repeat(auto-fit,minmax(130px,1fr))">
-       ${list.map(v=>`<button class="mode" data-inf="${v.inf}">
-         <div class="t">${fullSet.has(v.inf)?'⭐ ':''}${v.inf}${v.irr?' <span class="tag">неправ.</span>':''}</div>
-         <div class="d">${esc(v.ru||'')}</div></button>`).join('')}
+     <input class="answer" id="vSearch" placeholder="поиск: falar, спать, -ir, неправ…"
+       autocomplete="off" autocapitalize="off" spellcheck="false" style="margin-top:0">
+     <div class="row" style="margin-top:8px">
+       <button class="btn ghost" data-f="all" style="padding:6px 12px;font-size:13px">все</button>
+       <button class="btn ghost" data-f="star" style="padding:6px 12px;font-size:13px">⭐ с фразами</button>
+       <button class="btn ghost" data-f="irr" style="padding:6px 12px;font-size:13px">неправильные</button>
+       <button class="btn ghost" data-f="reg" style="padding:6px 12px;font-size:13px">правильные</button>
+       <button class="btn ghost" data-f="-ar" style="padding:6px 12px;font-size:13px">-ar</button>
+       <button class="btn ghost" data-f="-er" style="padding:6px 12px;font-size:13px">-er</button>
+       <button class="btn ghost" data-f="-ir" style="padding:6px 12px;font-size:13px">-ir</button>
      </div>
+     <p class="small muted" style="margin-top:10px">⭐ — с полными фразами (дополнение, все виды заданий)</p>
+     <div class="grid" id="vGrid" style="grid-template-columns:repeat(auto-fit,minmax(130px,1fr))">
+       ${list.map(card).join('')}
+     </div>
+     <div class="small muted" id="vEmpty" style="display:none">Ничего не найдено</div>
    </div>`;
   document.getElementById('back').onclick = conjMenu;
-  document.querySelectorAll('[data-inf]').forEach(b=> b.onclick = ()=> verbSections(drillFor(b.dataset.inf)));
+  const grid = document.getElementById('vGrid');
+  const bind = ()=> grid.querySelectorAll('[data-inf]').forEach(b=>
+    b.onclick = ()=> verbSections(drillFor(b.dataset.inf)));
+  bind();
+  let mode = 'all';
+  const apply = ()=>{
+    const q = strip((document.getElementById('vSearch').value||'').toLowerCase().trim());
+    const sel = list.filter(v=>{
+      if(mode==='star' && !fullSet.has(v.inf)) return false;
+      if(mode==='irr' && !v.irr) return false;
+      if(mode==='reg' && v.irr) return false;
+      if(mode.startsWith('-') && !v.inf.endsWith(mode.slice(1))) return false;
+      if(!q) return true;
+      return strip(v.inf.toLowerCase()).includes(q) || strip((v.ru||'').toLowerCase()).includes(q);
+    });
+    grid.innerHTML = sel.map(card).join('');
+    document.getElementById('vEmpty').style.display = sel.length? 'none':'block';
+    bind();
+  };
+  document.getElementById('vSearch').oninput = apply;
+  document.querySelectorAll('[data-f]').forEach(b=> b.onclick = ()=>{
+    mode = b.dataset.f;
+    document.querySelectorAll('[data-f]').forEach(x=>x.classList.add('ghost'));
+    b.classList.remove('ghost');
+    apply();
+  });
 }
-
 function verbSections(d){
   const v = DATA.verbs.find(x=>x.inf===d.inf);
   const hasPps = !!(v && v.pps);
