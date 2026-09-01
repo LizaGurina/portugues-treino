@@ -66,8 +66,8 @@ function makeQ(p){ if(p._pre) return p._pre;
   else if(p.kind==='numh'){
     q.type='input'; q.label='Число на слух — запишите цифрами';
     q.prompt='🔊'; q.sub='нажмите динамик, чтобы прослушать ещё раз';
-    q.answers=[String(p.n)]; q.speakNow=numToPt(p.n); q.speakAfter=numToPt(p.n);
-    q.rule='números'; q.note='пишите цифрами: 42';
+    q.answers=[String(p.n), numToPt(p.n)]; q.speakNow=numToPt(p.n); q.speakAfter=numToPt(p.n);
+    q.rule='números'; q.note='цифрами (42) или словами (quarenta e dois)';
   }
   else if(p.kind==='horaw'){
     q.type='input'; q.label='Скажите время по-португальски';
@@ -77,8 +77,9 @@ function makeQ(p){ if(p._pre) return p._pre;
   else if(p.kind==='horah'){
     q.type='input'; q.label='Время на слух — запишите цифрами';
     q.prompt='🔊'; q.sub='например: 14:30';
-    q.answers=horaDigits(p.t); q.speakNow=horaWords(p.t)[0];
+    q.answers=[...horaDigits(p.t), ...horaWords(p.t)]; q.speakNow=horaWords(p.t)[0];
     q.speakAfter=horaWords(p.t)[0]; q.rule='horas';
+    q.note='цифрами (14:30) или словами';
   }
   else if(p.kind==='qw'){
     const c = DATA.qw[p.i];
