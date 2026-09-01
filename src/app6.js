@@ -54,9 +54,9 @@ function horaWords(t){        // все допустимые прочтения
 function horaDigits(t){       // допустимые цифровые ответы на слух
   let [h,m] = t.split(':').map(Number);
   const mm = String(m).padStart(2,'0');
-  const out = [`${h}:${mm}`];
+  const out = [`${h}:${mm}`, `${h}h${mm}`];
   const h12 = h%12===0? 12 : h%12;
-  if(h12!==h) out.push(`${h12}:${mm}`);
+  if(h12!==h) out.push(`${h12}:${mm}`, `${h12}h${mm}`);
   if(h===0) out.push(`24:${mm}`,`12:${mm}`);
   return out;
 }

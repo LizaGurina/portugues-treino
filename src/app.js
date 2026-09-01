@@ -36,8 +36,27 @@ function norm(s){
     .replace(/[.!?;,]+$/,'').replace(/\s([.,!?;:])/g,'$1');
 }
 const canon = s => norm(s).replace(/[.,!?;:«»"()]/g,'').replace(/\s+/g,' ').trim();
+/* «3: 15», «3 h 15», «3.15», «03:15» → «3:15» */
+function normTime(s){
+  let t = (s||'').toString().trim().toLowerCase()
+    .replace(/\s*[:.\-hн]\s*/g, ':')
+    .replace(/\s+/g, '');
+  const m = t.match(/^(\d{1,2}):?(\d{2})?$/);
+  if(!m) return null;
+  const h = parseInt(m[1],10), mi = m[2] ? parseInt(m[2],10) : 0;
+  if(h>24 || mi>59) return null;
+  return h + ':' + String(mi).padStart(2,'0');
+}
 function check(given, answers){
+  const gt = normTime(given);
+  if(gt){
+    for(const a of answers){ const at = normTime(a); if(at && at===gt) return {ok:true, target:a}; }
+  }
   const g = canon(given);
+  const digits = x => (x||'').toString().replace(/[\s.,']/g,'');
+  if(/^[\d\s.,']+$/.test(given||'')){
+    for(const a of answers){ if(/^[\d\s.,']+$/.test(a) && digits(a)===digits(given)) return {ok:true, target:a}; }
+  }
   for(const a of answers){ if(g === canon(a)) return {ok:true, target:a}; }
   for(const a of answers){ if(strip(g) === strip(canon(a))) return {ok:!S.set.strict, near:true, target:a}; }
   // ближайший ответ для показа
