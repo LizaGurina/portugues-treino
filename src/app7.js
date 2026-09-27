@@ -11,59 +11,67 @@ try{
 }catch(e){}
 
 const AI_SYS = `Ты проверяешь ответы ученицы уровня A1 по европейскому португальскому (учебник Português a Valer 1).
-Вопрос один: ДОПУСТИМ ли её ответ — грамматически корректен и решает ли коммуникативную задачу. Совпадение с образцом НЕ требуется.
-ok=true, если ответ грамматичен и по делу. Допустимы и НЕ являются ошибкой:
-- другой порядок слов, синонимы, отсутствие запятых;
-- ОПУЩЕННОЕ ПОДЛЕЖАЩЕЕ — португальский pro-drop язык: «Oferece um presente», «Moro em Lisboa», «Vamos à praia» без ela/eu/nós полностью нормальны. НИКОГДА не пиши «отсутствует подлежащее», «нужно указать, кто совершает действие» и т.п. Наличие или отсутствие eu/tu/ele/ela/nós/vocês НЕ проверяется;
-- стилистические варианты: quero/queria, por favor/faz favor/se faz favor, olá/bom dia, obrigado/obrigada;
-- иная, но корректная формулировка той же мысли.
-ЖЁСТКОЕ ПРАВИЛО О РЕГИСТРЕ: заглавные и строчные буквы полностью игнорируются. Перед оценкой мысленно приведи и ответ, и любые сравнения к нижнему регистру. Строчная буква в начале предложения, «portugal» вместо «Portugal», «ana» вместо «Ana» — НЕ ошибка. Запрещено упоминать регистр, заглавную букву, начало предложения или имена собственные в поле why.
-Если в задании по-русски не указано число («вы» без пометки), считай верными И você/о senhor (вежливо к одному), И vocês (к нескольким) — не считай выбор обращения ошибкой.
-Поле «для_справки_один_из_вариантов» дано ТОЛЬКО чтобы ты понял смысл задания. Оцени фразу ученицы саму по себе, как её оценил бы носитель: грамматична ли она и решает ли задачу. НИКОГДА не сравнивай с этим полем и не ссылайся на него.
-Другое вопросительное слово, другая конструкция, другой порядок слов — НЕ ошибка, если получившаяся фраза корректна и уместна. Например «Чем ты занимаешься? (профессия)»: верны и «O que fazes?», и «Qual é a tua profissão?», и «Em que trabalhas?». Запрещённые формулировки: «не совпадает с образцом», «неверный выбор слова для этого вопроса», «в задании указано другое», «отличается от примера».
-Синонимы и равноправные варианты европейского португальского — НЕ ошибка, даже если в примере другое слово:
-viver = morar (жить), estudar = aprender (учить язык), telemóvel = telefone, começar = iniciar, falar = dizer (в подходящем контексте), gostar de = adorar (по силе разные, но оба верны), faz favor = por favor, adeus = até logo, apanhar = tomar (транспорт), pequeno-almoço, casa de banho, autocarro, comboio, sandes, ecrã.
-Слово ошибочно ТОЛЬКО если оно реально означает другое, не существует или не сочетается с этим глаголом/предлогом.
+Вопрос один: допустим ли её ответ — грамматичен ли он и решает ли коммуникативную задачу. Совпадение с примером НЕ требуется.
+Поле «для_справки_один_из_вариантов» дано ТОЛЬКО чтобы понять смысл задания: оцени фразу ученицы саму по себе, как носитель, и никогда не ссылайся на этот пример.
 
-ПРОВЕРЬ СЕБЯ перед ответом:
-1) В каждой паре «X → Y» X и Y должны РЕАЛЬНО различаться. Если получается «vivemos → vivemos» — это не ошибка, убери её.
-2) Если ты собираешься исправить слово на синоним (viver→morar, aprender→estudar) — НЕ делай этого, это не ошибка.
-3) Если после удаления таких пунктов ошибок не осталось — ответ ok:true.
-4) «fix» пиши, только если ok:false; он должен отличаться от ответа ученицы. Каждая ошибка — только конкретная языковая: диакритика, род, число, спряжение, предлог, порядок слов, лексика.
-ok=false ТОЛЬКО при реальных ошибках: неверное спряжение или форма глагола, неверный предлог/артикль/род,
-пропущенная диакритика (cafe вместо café), не тот смысл, слова не по-португальски, бразилизмы вместо европейской нормы (в т.ч. gerúndio: estou falando).
-Отвечай ТОЛЬКО JSON: {"ok": true/false, "why": "...", "fix": "минимально исправленный вариант ответа ученицы (пустая строка, если ошибок нет)"}
-Поле "why": если ошибок нет — одно предложение, почему вариант хорош. Если есть — перечисли ВСЕ ошибки, каждую с новой строки в формате «слово → исправление — короткое объяснение почему (род, спряжение, предлог и т.п.)». Не пропускай ни одной ошибки, включая согласование рода и числа.`;
+ПОРЯДОК РАБОТЫ:
+1) Сначала переведи фразу ученицы на русский БУКВАЛЬНО, как она написана (поле "перевод").
+2) Сравни этот перевод со смыслом задания. Если смысл тот же и фраза грамматична — ok:true, даже если слова другие.
+3) Только потом перечисли конкретные языковые ошибки.
 
-/* вычищаем мусорные «ошибки»: X → X и правки на синонимы */
-const SYN_PAIRS = [['viver','morar'],['vivo','moro'],['vives','moras'],['vive','mora'],
- ['vivemos','moramos'],['vivem','moram'],['vivi','morei'],['viveu','morou'],
- ['estudar','aprender'],['estudo','aprendo'],['estudas','aprendes'],['estuda','aprende'],
- ['estudamos','aprendemos'],['estudam','aprendem'],
- ['telefone','telemóvel'],['por favor','faz favor'],['adeus','até logo'],
- ['apanhar','tomar'],['começar','iniciar'],['gostar','adorar']];
-function sameWord(a,b){ return (a||'').toLowerCase().trim() === (b||'').toLowerCase().trim(); }  // акценты важны
-function isSynPair(a,b){
-  const x = strip((a||'').toLowerCase().trim()), y = strip((b||'').toLowerCase().trim());
-  return SYN_PAIRS.some(([p,q])=>{
-    const P=strip(p), Q=strip(q);
-    return (x.includes(P)&&y.includes(Q)) || (x.includes(Q)&&y.includes(P));
-  });
-}
+Верни JSON:
+{"перевод": "что буквально означает фраза ученицы", "ok": true|false, "errors": [{"from":"...", "to":"...", "type":"...", "why":"короткое объяснение по-русски"}], "fix": "исправленный вариант или пустая строка"}
+
+Тип каждой ошибки — строго одно из:
+- "diacritico" — пропущен или лишний знак: cafe→café, manha→manhã
+- "ortografia" — опечатка, неверное написание: arumar→arrumar
+- "concordancia" — род или число: duas bilhetas→dois bilhetes
+- "conjugacao" — неверная форма глагола или лицо: telefoneu→telefonou
+- "preposicao" — неверный или лишний предлог/артикль: para quem→a quem
+- "estrutura" — сломанный порядок слов, из-за которого фраза непонятна
+- "sentido" — фраза грамматична, но означает НЕ то, что просили (vens «придёшь» вместо voltas «вернёшься»; posso falar «можно мне говорить» вместо просьбы к собеседнику)
+- "lexico" — ученица выбрала ДРУГОЕ существующее слово, которое здесь тоже уместно (viver/morar, estudar/aprender, telemóvel/telefone, apanhar/tomar о транспорте и любые другие синонимы)
+- "registo" — стиль/вежливость (quero vs queria)
+- "maiuscula", "pontuacao" — регистр и знаки препинания
+
+ВАЖНО: "lexico", "registo", "maiuscula", "pontuacao" — это НЕ ошибки уровня A1: помечай их этим типом, но НЕ считай основанием для ok:false.
+ok:false ставь, только если есть хотя бы одна ошибка типа diacritico, ortografia, concordancia, conjugacao, preposicao, estrutura или sentido.
+Опущенное подлежащее (pro-drop) не ошибка и не попадает в errors: «Moro em Lisboa», «Oferece um presente» — норма.
+Регистр букв игнорируй полностью.
+Если ошибок указанных типов нет — errors может содержать записи с типом lexico/registo, но ok:true и fix:"".
+Каждая запись errors должна иметь from ≠ to.
+Проверь по переводу: если «перевод» совпадает по смыслу с заданием и в errors только мягкие типы — ставь ok:true.
+Слово без нужного акцента — это другое слово (nos «нас» ≠ nós «мы», e «и» ≠ é «есть»): такие случаи всегда diacritico, не пропускай их.`;
+
+/* фильтр вердикта: отбрасываем классы, которые не ошибки на A1 */
+const SOFT_TYPES = new Set(['lexico','registo','maiuscula','pontuacao','estilo','sinonimo']);
+function sameWord(a,b){ return (a||'').toLowerCase().trim() === (b||'').toLowerCase().trim(); }
 function cleanVerdict(res, given){
-  if(!res || res.err || res.ok) return res;
-  const parts = (res.why||'').split(/\n|;\s+/).map(t=>t.trim()).filter(Boolean);
-  const kept = parts.filter(t=>{
-    const m = t.match(/^(.+?)\s*(?:→|->)\s*([^—\-]+)/);
-    if(!m) return true;                       // не в формате стрелки — оставляем
-    const a = m[1], b = m[2];
-    if(sameWord(a,b)) return false;           // «vivemos → vivemos»
-    if(isSynPair(a,b)) return false;          // правка на синоним
-    return true;
-  });
-  if(!kept.length) return {ok:true, why:'Вариант допустим.', fix:''};
+  if(!res || res.err) return res;
+  let hard = [], soft = [];
+  if(Array.isArray(res.errors)){
+    res.errors.forEach(e=>{
+      if(!e || sameWord(e.from, e.to)) return;                 // «vivemos → vivemos»
+      (SOFT_TYPES.has((e.type||'').toLowerCase()) ? soft : hard).push(e);
+    });
+  }else if(!res.ok && res.why){                                 // старый формат — подстраховка
+    (res.why||'').split(/\n|;\s+/).map(t=>t.trim()).filter(Boolean).forEach(t=>{
+      const m = t.match(/^(.+?)\s*(?:→|->)\s*([^—\-]+)/);
+      if(m && sameWord(m[1], m[2])) return;
+      hard.push({why:t});
+    });
+  }
+  const fmt = e => e.from && e.to ? `${e.from} → ${e.to} — ${e.why||''}`.trim() : (e.why||'');
+  const tr = res['перевод'] ? `ваша фраза: «${res['перевод']}»` : '';
+  if(!hard.length){
+    const note = soft.length ? 'Вариант допустим. ' + soft.map(e=>`${e.from} / ${e.to} — оба годятся`).join('; ')
+                             : (res.ok && res.why ? res.why : 'Вариант допустим.');
+    return {ok:true, why:note, fix:''};
+  }
   if(res.fix && sameWord(res.fix, given)) return {ok:true, why:'Вариант допустим.', fix:''};
-  return {ok:false, why:kept.join('; '), fix:res.fix};
+  const lines = hard.map(fmt);
+  if(tr && hard.some(e=>(e.type||'')==='sentido')) lines.unshift(tr);
+  return {ok:false, why:lines.join('\n'), fix:res.fix||''};
 }
 
 async function aiJudge(payload){

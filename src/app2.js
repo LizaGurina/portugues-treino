@@ -117,9 +117,15 @@ function makeQ(p){ if(p._pre) return p._pre;
   }
   else if(p.kind==='mc'){
     const m = DATA.mc[p.i];
-    q.type='choice'; q.label='Выберите правильный вариант'; q.gap=m.s;
-    q.options=shuffle([m.a, ...m.wrong]); q.correct=m.a; q.note=m.hint||'';
-    q.speakAfter=m.s.replace(/___/g, m.a);
+    q.gap=m.s; q.note=m.hint||''; q.speakAfter=m.s.replace(/___/g, m.a);
+    // если в скобках дан инфинитив — форму вписываем по памяти, а не выбираем
+    if(/\([a-zà-öø-ÿ]+(?:ar|er|ir|ôr)(?:-se)?\)/i.test(m.s)){
+      q.type='input'; q.label='Впишите форму глагола';
+      q.answers=[m.a, m.a.toLowerCase()];
+    }else{
+      q.type='choice'; q.label='Выберите правильный вариант';
+      q.options=shuffle([m.a, ...m.wrong]); q.correct=m.a;
+    }
   }
   else if(p.kind==='trans'){
     const t = DATA.trans[p.i];
