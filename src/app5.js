@@ -396,3 +396,44 @@ function complexMenu(){
     startSession(f, t);
   });
 }
+
+/* ================= ГРАММАТИКА: ПОДРАЗДЕЛЫ ================= */
+const GRAM_GROUPS = [
+ {key:'serestar', ru:'Ser или estar',            icon:'⚖️', rules:['ser_estar']},
+ {key:'imper',    ru:'Императив',                icon:'❗', rules:['imperativo']},
+ {key:'pron',     ru:'Местоимения',              icon:'👉', rules:['ci_pronome','prep_pronome','com_pronome','reflexos']},
+ {key:'demo',     ru:'Указательные este/esse/aquele', icon:'📍', rules:['demonstrativos']},
+ {key:'indef',    ru:'Неопределённые alguém/ninguém', icon:'🔍', rules:['indefinidos']},
+ {key:'hadesde',  ru:'Há и desde',               icon:'⏳', rules:['ha_desde']},
+ {key:'comp',     ru:'Сравнение и tão/tanto',    icon:'📊', rules:['comparativo','igualdade','tao_tanto']},
+ {key:'modal',    ru:'ter de · precisar · dever · costumar', icon:'🎯', rules:['ter_de','precisar_dever','costumar','cortesia']},
+ {key:'estados',  ru:'estar com / ter + nome',   icon:'🤒', rules:['estar_com_ter','andar_adj']},
+ {key:'verbos',   ru:'Presente и выбор глагола', icon:'🔤', rules:['pres_regulares','saber_conhecer']},
+ {key:'pps',      ru:'Прошедшее PPS',            icon:'⏪', rules:['pps_regulares','pps_irregulares','pps_marcadores']},
+ {key:'futuro',   ru:'Estar a / Ir + Infinitivo',icon:'▶️', rules:['estar_a','ir_inf']},
+ {key:'conect',   ru:'Союзы и маркеры времени',  icon:'🔗', rules:['conectores','marcadores_temp','impessoal_se']},
+ {key:'ordinais', ru:'Порядковые числительные',  icon:'🥇', rules:['ordinais']},
+];
+function grammarMenu(){
+  buildPool();
+  const isGram = p => p.group==='rules' && !['numw','numh','horaw','horah'].includes(p.kind);
+  const cnt = g => POOL.filter(p=> isGram(p) && g.rules.includes(p.rule)).length;
+  const groups = GRAM_GROUPS.filter(g=>cnt(g)>0);
+  document.getElementById('view').innerHTML = `
+   <div class="row" style="margin-bottom:14px"><button class="btn ghost" id="back">← назад</button></div>
+   <div class="card"><h2>Грамматика — что отрабатываем?</h2>
+     <div class="opts">
+       ${groups.map((g,i)=>`<button class="opt" data-gg="${g.key}"><span class="k">${i+1}</span>
+         <span><b>${g.icon} ${esc(g.ru)}</b><br><span class="small muted">${cnt(g)} заданий</span></span></button>`).join('')}
+       <button class="opt" data-gg="__all"><span class="k">${groups.length+1}</span>
+         <span><b>Всё вперемешку</b><br><span class="small muted">${POOL.filter(isGram).length} заданий</span></span></button>
+     </div>
+   </div>`;
+  document.getElementById('back').onclick = home;
+  document.querySelectorAll('[data-gg]').forEach(b=> b.onclick = ()=>{
+    const k = b.dataset.gg;
+    if(k==='__all'){ startSession(isGram, 'Грамматика'); return; }
+    const g = GRAM_GROUPS.find(x=>x.key===k);
+    startSession(p=> isGram(p) && g.rules.includes(p.rule), g.icon+' '+g.ru);
+  });
+}

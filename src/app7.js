@@ -21,11 +21,50 @@ ok=true, если ответ грамматичен и по делу. Допус
 Если в задании по-русски не указано число («вы» без пометки), считай верными И você/о senhor (вежливо к одному), И vocês (к нескольким) — не считай выбор обращения ошибкой.
 Поле «для_справки_один_из_вариантов» дано ТОЛЬКО чтобы ты понял смысл задания. Оцени фразу ученицы саму по себе, как её оценил бы носитель: грамматична ли она и решает ли задачу. НИКОГДА не сравнивай с этим полем и не ссылайся на него.
 Другое вопросительное слово, другая конструкция, другой порядок слов — НЕ ошибка, если получившаяся фраза корректна и уместна. Например «Чем ты занимаешься? (профессия)»: верны и «O que fazes?», и «Qual é a tua profissão?», и «Em que trabalhas?». Запрещённые формулировки: «не совпадает с образцом», «неверный выбор слова для этого вопроса», «в задании указано другое», «отличается от примера».
-Синонимы и равноправные бытовые варианты европейского португальского — НЕ ошибка: telemóvel/telefone, autocarro, pequeno-almoço, casa de banho, comboio, ecrã, sandes, faz favor/por favor, adeus/até logo. Слово, отличное от примера, ошибочно только если оно реально означает другое или не существует. Каждая ошибка — только конкретная языковая: диакритика, род, число, спряжение, предлог, порядок слов, лексика.
+Синонимы и равноправные варианты европейского португальского — НЕ ошибка, даже если в примере другое слово:
+viver = morar (жить), estudar = aprender (учить язык), telemóvel = telefone, começar = iniciar, falar = dizer (в подходящем контексте), gostar de = adorar (по силе разные, но оба верны), faz favor = por favor, adeus = até logo, apanhar = tomar (транспорт), pequeno-almoço, casa de banho, autocarro, comboio, sandes, ecrã.
+Слово ошибочно ТОЛЬКО если оно реально означает другое, не существует или не сочетается с этим глаголом/предлогом.
+
+ПРОВЕРЬ СЕБЯ перед ответом:
+1) В каждой паре «X → Y» X и Y должны РЕАЛЬНО различаться. Если получается «vivemos → vivemos» — это не ошибка, убери её.
+2) Если ты собираешься исправить слово на синоним (viver→morar, aprender→estudar) — НЕ делай этого, это не ошибка.
+3) Если после удаления таких пунктов ошибок не осталось — ответ ok:true.
+4) «fix» пиши, только если ok:false; он должен отличаться от ответа ученицы. Каждая ошибка — только конкретная языковая: диакритика, род, число, спряжение, предлог, порядок слов, лексика.
 ok=false ТОЛЬКО при реальных ошибках: неверное спряжение или форма глагола, неверный предлог/артикль/род,
 пропущенная диакритика (cafe вместо café), не тот смысл, слова не по-португальски, бразилизмы вместо европейской нормы (в т.ч. gerúndio: estou falando).
 Отвечай ТОЛЬКО JSON: {"ok": true/false, "why": "...", "fix": "минимально исправленный вариант ответа ученицы (пустая строка, если ошибок нет)"}
 Поле "why": если ошибок нет — одно предложение, почему вариант хорош. Если есть — перечисли ВСЕ ошибки, каждую с новой строки в формате «слово → исправление — короткое объяснение почему (род, спряжение, предлог и т.п.)». Не пропускай ни одной ошибки, включая согласование рода и числа.`;
+
+/* вычищаем мусорные «ошибки»: X → X и правки на синонимы */
+const SYN_PAIRS = [['viver','morar'],['vivo','moro'],['vives','moras'],['vive','mora'],
+ ['vivemos','moramos'],['vivem','moram'],['vivi','morei'],['viveu','morou'],
+ ['estudar','aprender'],['estudo','aprendo'],['estudas','aprendes'],['estuda','aprende'],
+ ['estudamos','aprendemos'],['estudam','aprendem'],
+ ['telefone','telemóvel'],['por favor','faz favor'],['adeus','até logo'],
+ ['apanhar','tomar'],['começar','iniciar'],['gostar','adorar']];
+function sameWord(a,b){ return (a||'').toLowerCase().trim() === (b||'').toLowerCase().trim(); }  // акценты важны
+function isSynPair(a,b){
+  const x = strip((a||'').toLowerCase().trim()), y = strip((b||'').toLowerCase().trim());
+  return SYN_PAIRS.some(([p,q])=>{
+    const P=strip(p), Q=strip(q);
+    return (x.includes(P)&&y.includes(Q)) || (x.includes(Q)&&y.includes(P));
+  });
+}
+function cleanVerdict(res, given){
+  if(!res || res.err || res.ok) return res;
+  const parts = (res.why||'').split(/\n|;\s+/).map(t=>t.trim()).filter(Boolean);
+  const kept = parts.filter(t=>{
+    const m = t.match(/^(.+?)\s*(?:→|->)\s*([^—\-]+)/);
+    if(!m) return true;                       // не в формате стрелки — оставляем
+    const a = m[1], b = m[2];
+    if(sameWord(a,b)) return false;           // «vivemos → vivemos»
+    if(isSynPair(a,b)) return false;          // правка на синоним
+    return true;
+  });
+  if(!kept.length) return {ok:true, why:'Вариант допустим.', fix:''};
+  if(res.fix && sameWord(res.fix, given)) return {ok:true, why:'Вариант допустим.', fix:''};
+  return {ok:false, why:kept.join('; '), fix:res.fix};
+}
 
 async function aiJudge(payload){
   const key = aiKey();
@@ -74,7 +113,8 @@ function aiSecondOpinion(q, given){
     'задание': q.label + ': ' + taskRu + (q.hintLabel? ' ['+q.hintLabel+']':''),
     'для_справки_один_из_вариантов': q.answers ? q.answers[0] : q.correct,
     'ответ_ученицы': given
-  }).then(res=>{
+  }).then(res0=>{
+    const res = cleanVerdict(res0, given);
     if(!res){ box.remove(); return; }
     if(res.err){ box.innerHTML = `<span class="small muted">🤖 ${esc(res.err)}</span>`; return; }
     if(res.ok){
@@ -116,7 +156,8 @@ function aiDialogOpinion(step, text, onAccept){
     'задание': step.task,
     'для_справки_один_из_вариантов': step.model,
     'ответ_ученицы': text
-  }).then(res=>{
+  }).then(res0=>{
+    const res = cleanVerdict(res0, text);
     if(!res){ box.remove(); return; }
     if(res.err){ box.innerHTML = `<span class="small muted">🤖 ${esc(res.err)}</span>`; return; }
     if(res.ok){
@@ -160,7 +201,8 @@ function aiDialogVerify(step, text){
     'задание': step.task,
     'для_справки_один_из_вариантов': step.model,
     'ответ_ученицы': text
-  }).then(res=>{
+  }).then(res0=>{
+    const res = cleanVerdict(res0, text);
     if(!res || res.err){ box.remove(); return; }
     if(res.ok){
       box.innerHTML = `<span class="small" style="color:var(--accent)">🤖 AI подтверждает: грамматика верна${res.why? ' · '+esc(res.why):''}</span>`;

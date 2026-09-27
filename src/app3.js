@@ -71,7 +71,7 @@ function home(){
       <button class="mode" data-f="prep"><div class="t">Предлоги и артикли</div>
         <div class="d">de/em · a/para/por · слияния do/na/pelo</div></button>
       <button class="mode" data-f="rules"><div class="t">Грамматика</div>
-        <div class="d">ser/estar · императив · местоимения · há/desde</div></button>
+        <div class="d">выбор темы: ser/estar · императив · местоимения · указательные · há/desde…</div></button>
       <button class="mode" id="toQw"><div class="t">❓ Вопросительные слова</div>
         <div class="d">quem · o que · onde · quando · quanto · porque… + на слух</div></button>
       <button class="mode" id="toComplex"><div class="t">🧩 Сложные предложения</div>
@@ -132,6 +132,7 @@ function home(){
     const RULEGRP = p => p.group==='rules' && !NUMK(p);
     const PREP = p => p.rule && ['de_em_paises','prep_tempo','prep_movimento','para_por','em_meses','transportes','contracoes','lugar','prep_pronome','com_pronome','artigos'].includes(p.rule);
     if(f==='conj'){ conjMenu(); return; }
+    if(f==='rules'){ grammarMenu(); return; }
     const map = {
       conj: p=>p.kind==='conj',
       trans: p=>p.kind==='trans',
