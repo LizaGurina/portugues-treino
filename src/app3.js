@@ -128,7 +128,8 @@ function home(){
   document.getElementById('allStories').onclick = storiesList;
   document.querySelectorAll('[data-f]').forEach(b=> b.onclick = ()=>{
     const f = b.dataset.f;
-    const RULEGRP = p => p.group==='rules';
+    const NUMK = p => ['numw','numh','horaw','horah'].includes(p.kind);
+    const RULEGRP = p => p.group==='rules' && !NUMK(p);
     const PREP = p => p.rule && ['de_em_paises','prep_tempo','prep_movimento','para_por','em_meses','transportes','contracoes','lugar','prep_pronome','com_pronome','artigos'].includes(p.rule);
     if(f==='conj'){ conjMenu(); return; }
     const map = {
