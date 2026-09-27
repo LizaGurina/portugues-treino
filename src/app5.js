@@ -34,10 +34,12 @@ function lexisTheme(key){
      <div class="opts">
        <button class="opt" data-m="rec"><span class="k">1</span>
          <span><b>Значение слова · PT → RU</b><br><span class="small muted">слышишь и видишь португальское слово → выбираешь перевод</span></span></button>
-       <button class="opt" data-m="prod"><span class="k">2</span>
+       <button class="opt" data-m="recpt"><span class="k">2</span>
+         <span><b>Выбрать слово · RU → PT</b><br><span class="small muted">«усталость» → выбираешь o cansaço из четырёх</span></span></button>
+       <button class="opt" data-m="prod"><span class="k">3</span>
          <span><b>Написать слово · RU → PT</b><br><span class="small muted">«антибиотик» → antibiótico (ввод или диктовка)</span></span></button>
-       <button class="opt" data-m="mix"><span class="k">3</span>
-         <span><b>Смешанный</b><br><span class="small muted">новое — на узнавание, знакомое — на ввод</span></span></button>
+       <button class="opt" data-m="mix"><span class="k">4</span>
+         <span><b>Смешанный</b><br><span class="small muted">новое → значение, потом выбор слова, затем ввод по памяти</span></span></button>
      </div>
    </div>`;
   document.getElementById('back').onclick = lexisList;

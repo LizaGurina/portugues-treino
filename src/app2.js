@@ -3,13 +3,21 @@ function makeQ(p){ if(p._pre) return p._pre;
   const q = {p, id:p.id};
   if(p.kind==='vocab'){
     const m = S.items[p.id];
-    let production = m && m.b >= 2;        // сначала узнавание, потом производство
-    if(SES && SES.mode==='rec') production = false;
-    if(SES && SES.mode==='prod') production = true;
-    if(production){
+    const box = m ? m.b : 0;
+    // режим: rec (PT→RU выбор) · recpt (RU→PT выбор) · prod (ввод) · null = смешанный по коробке
+    let mode = (SES && SES.mode) || (box>=2 ? 'prod' : (box>=1 ? 'recpt' : 'rec'));
+    if(mode==='prod'){
       q.type='input'; q.label='Напишите слово по-португальски';
       q.prompt=p.ru; q.answers=[p.pt, (p.art? p.art+' '+p.pt : p.pt)];
       q.speakAfter=(p.art? p.art+' ':'')+p.pt; q.note='';
+    }else if(mode==='recpt'){
+      q.type='choice'; q.label='Выберите португальское слово';
+      q.prompt=p.ru;
+      const others = shuffle(DATA.vocab.filter(w=>w.theme===p.theme && w.pt!==p.pt)).slice(0,3);
+      while(others.length<3){ const c=rnd(DATA.vocab); if(c.pt!==p.pt && !others.includes(c)) others.push(c); }
+      const label = w => (w.art? w.art+' ':'')+w.pt;
+      q.options = shuffle([label(p), ...others.map(label)]);
+      q.correct = label(p); q.speakAfter = p.pt;
     }else{
       q.type='choice'; q.label='Что это значит?'; q.prompt=(p.art? p.art+' ':'')+p.pt;
       q.speakNow=p.pt;
