@@ -181,9 +181,10 @@ function renderSession(){
   const dots = SES.queue.map((_,i)=>`<i class="${SES.log[i]===1?'done':SES.log[i]===2?'fixed':SES.log[i]===0?'bad':''}"></i>`).join('');
   v.innerHTML = `
     <div class="card">
-      <div style="display:flex;align-items:center;gap:10px">
+      <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
         <button class="btn ghost small" id="quit" style="padding:6px 10px;font-size:13px">← выйти</button>
         <span class="small muted">${SES.i+1} / ${n}</span>
+        ${SES.title? `<span class="small" style="color:var(--accent);font-weight:600">${esc(SES.title)}</span>`:''}
         <div class="dots">${dots}</div>
       </div>
       <div class="bar"><i style="width:${prog}%"></i></div>
