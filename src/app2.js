@@ -7,9 +7,9 @@ function makeQ(p){ if(p._pre) return p._pre;
     if(SES && SES.mode==='rec') production = false;
     if(SES && SES.mode==='prod') production = true;
     if(production){
-      q.type='input'; q.label='Переведите на португальский';
+      q.type='input'; q.label='Напишите слово по-португальски';
       q.prompt=p.ru; q.answers=[p.pt, (p.art? p.art+' '+p.pt : p.pt)];
-      q.speakAfter=p.pt; q.note = p.art ? 'артикль не обязателен' : '';
+      q.speakAfter=(p.art? p.art+' ':'')+p.pt; q.note='';
     }else{
       q.type='choice'; q.label='Что это значит?'; q.prompt=(p.art? p.art+' ':'')+p.pt;
       q.speakNow=p.pt;

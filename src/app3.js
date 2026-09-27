@@ -129,7 +129,7 @@ function home(){
   document.querySelectorAll('[data-f]').forEach(b=> b.onclick = ()=>{
     const f = b.dataset.f;
     const NUMK = p => ['numw','numh','horaw','horah'].includes(p.kind);
-    const RULEGRP = p => p.group==='rules' && !NUMK(p);
+    const RULEGRP = p => p.group==='rules' && !NUMK(p) && p.kind!=='gender';
     const PREP = p => p.rule && ['de_em_paises','prep_tempo','prep_movimento','para_por','em_meses','transportes','contracoes','lugar','prep_pronome','com_pronome','artigos'].includes(p.rule);
     if(f==='conj'){ conjMenu(); return; }
     if(f==='rules'){ grammarMenu(); return; }

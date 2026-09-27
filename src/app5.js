@@ -33,9 +33,9 @@ function lexisTheme(key){
    <div class="card"><h2>${t.icon} ${esc(t.ru)}</h2>
      <div class="opts">
        <button class="opt" data-m="rec"><span class="k">1</span>
-         <span><b>Узнать · PT → RU</b><br><span class="small muted">португальское слово с озвучкой → выбор перевода</span></span></button>
+         <span><b>Значение слова · PT → RU</b><br><span class="small muted">слышишь и видишь португальское слово → выбираешь перевод</span></span></button>
        <button class="opt" data-m="prod"><span class="k">2</span>
-         <span><b>Вспомнить · RU → PT</b><br><span class="small muted">русское слово → ввод или диктовка по-португальски</span></span></button>
+         <span><b>Написать слово · RU → PT</b><br><span class="small muted">«антибиотик» → antibiótico (ввод или диктовка)</span></span></button>
        <button class="opt" data-m="mix"><span class="k">3</span>
          <span><b>Смешанный</b><br><span class="small muted">новое — на узнавание, знакомое — на ввод</span></span></button>
      </div>

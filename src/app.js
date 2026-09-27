@@ -157,7 +157,8 @@ function buildPool(){
   // лексика
   DATA.vocab.forEach((w,i)=>{
     POOL.push({id:'v'+i, kind:'vocab', pt:w.pt, ru:w.ru, art:w.art, unit:w.unit, theme:w.theme, group:'vocab'});
-    if(w.art) POOL.push({id:'g'+i, kind:'gender', pt:w.pt, ru:w.ru, art:w.art, unit:w.unit, theme:w.theme, group:'vocab'});
+    if(w.art) POOL.push({id:'g'+i, kind:'gender', pt:w.pt, ru:w.ru, art:w.art, unit:w.unit,
+                         theme:w.theme, group:'rules', rule:'artigos', artCard:true});
   });
   // спряжения
   DATA.verbs.forEach((v,i)=>{
@@ -241,7 +242,7 @@ function themeOfDay(){
 }
 function themePool(th){
   const keys = new Set(th.vt);
-  return POOL.filter(p => (p.theme && keys.has(p.theme)) ||
+  return POOL.filter(p => (p.kind==='vocab' && p.theme && keys.has(p.theme)) ||
                           (th.key==='festas' && p.kind==='anto'));
 }
 function shuffle(a){ a=[...a]; for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];} return a; }
