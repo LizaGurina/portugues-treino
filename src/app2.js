@@ -119,7 +119,8 @@ function makeQ(p){ if(p._pre) return p._pre;
     const m = DATA.mc[p.i];
     q.gap=m.s; q.note=m.hint||''; q.speakAfter=m.s.replace(/___/g, m.a);
     // если в скобках дан инфинитив — форму вписываем по памяти, а не выбираем
-    if(/\([a-zà-öø-ÿ]+(?:ar|er|ir|ôr)(?:-se)?\)/i.test(m.s)){
+    const infM = m.s.match(/\(([a-zà-öø-ÿ-]{2,})\)/i);
+    if(infM && /(ar|er|ir|ôr)(-se)?$/i.test(infM[1])){
       q.type='input'; q.label='Впишите форму глагола';
       q.answers=[m.a, m.a.toLowerCase()];
     }else{
