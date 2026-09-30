@@ -240,10 +240,18 @@ RULES = [
   ("No domingo passado, nós comemos cachupa.", "В прошлое воскресенье мы ели кашупу."),
   ("Ontem, o Tiago vestiu o casaco.", "Вчера Тиагу надел куртку.")]),
 
-("pps_irregulares", 8, "PPS — неправильные: ir/ser, estar, ter",
+("pps_irregulares", 8, "PPS — неправильные глаголы",
  "<b>ir</b> и <b>ser</b> совпадают: fui, foste, foi, fomos, foram<br>"
  "<b>estar</b>: estive, estiveste, esteve, estivemos, estiveram<br>"
- "<b>ter</b>: tive, tiveste, teve, tivemos, tiveram",
+ "<b>ter</b>: tive, tiveste, teve, tivemos, tiveram<br><br>"
+ "Следующая группа (Português a Valer 2, юнит 1):<br>"
+ "<b>fazer</b>: fiz, fizeste, fez, fizemos, fizeram<br>"
+ "<b>ver</b>: vi, viste, viu, vimos, viram<br>"
+ "<b>vir</b>: vim, vieste, veio, viemos, vieram<br>"
+ "<b>dizer</b>: disse, disseste, disse, dissemos, disseram<br>"
+ "<b>trazer</b>: trouxe, trouxeste, trouxe, trouxemos, trouxeram<br>"
+ "Внимание: <i>ver</i> и <i>vir</i> легко спутать — <b>vi</b> (я видела) vs <b>vim</b> (я пришла), "
+ "<b>viu</b> (видел) vs <b>veio</b> (пришёл).",
  [("No sábado à noite, tu foste ao cinema?", "В субботу вечером ты ходила в кино?"),
   ("Ontem, o empregado foi muito simpático.", "Вчера официант был очень любезен."),
   ("Hoje de manhã, a Annika teve um acidente.", "Сегодня утром у Анники была авария.")]),

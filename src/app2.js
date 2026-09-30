@@ -109,6 +109,12 @@ function makeQ(p){ if(p._pre) return p._pre;
     q.prompt=c.ru; q.answers=[c.pt, ...(c.alts||[])];
     q.speakAfter=c.pt; q.rule=c.rule;
   }
+  else if(p.kind==='imp'){
+    const c = IMP_CARDS.find(x=>x.k===p.ck);
+    const card = impCard(p.inf, c);
+    q.type='input'; q.label=card.label; q.prompt=card.prompt; q.subHtml=card.subHtml;
+    q.answers=card.answers; q.speakAfter=card.pt; q.rule='imperativo';
+  }
   else if(p.kind==='anto'){
     const a = DATA.antonyms[p.i];
     const fwd = Math.random()<.5;

@@ -92,8 +92,16 @@ PPS_IRR = {
     "divertir":  ["diverti", "divertiste", "divertiu", "divertimos", "divertiram"],
 }
 
-# глаголы, PPS которых в учебнике A1 НЕ вводится → не тренируем
-NO_PPS = {"poder", "querer", "dizer", "saber", "fazer", "trazer", "pôr", "vir",
+# PPS неправильные из Português a Valer 2 (юнит 1): fazer, ver, vir, dizer, trazer
+PPS_IRR.update({
+    "fazer":  ["fiz", "fizeste", "fez", "fizemos", "fizeram"],
+    "vir":    ["vim", "vieste", "veio", "viemos", "vieram"],
+    "dizer":  ["disse", "disseste", "disse", "dissemos", "disseram"],
+    "trazer": ["trouxe", "trouxeste", "trouxe", "trouxemos", "trouxeram"],
+})
+
+# PPS этих глаголов пока не вводился
+NO_PPS = {"poder", "querer", "saber", "pôr",
           "doer", "chover", "nevar", "haver"}
 
 # --- список глаголов: (инфинитив, перевод, юнит, возвратный) ---------------

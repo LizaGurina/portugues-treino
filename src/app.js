@@ -169,6 +169,13 @@ function buildPool(){
                  rule: t==='pres'?'pres_regulares': t==='estar'?'estar_a': t==='ir'?'ir_inf':(v.pps&&DATA.ppsIrr.includes(v.inf)?'pps_irregulares':'pps_regulares')});
     });
   });
+  DATA.verbs.forEach((v,i)=>{
+    if(!impForms(v.inf)) return;
+    IMP_CARDS.forEach(c=>{
+      POOL.push({id:'ip'+i+c.k, kind:'imp', inf:v.inf, ck:c.k, person:c.person, neg:c.neg,
+                 unit:6, group:'conj', rule:'imperativo', irr:!!v.irr});
+    });
+  });
   DATA.verbDrills.forEach((d,i)=>{
     ['pres','estar','ir','pps'].forEach(t=>{
       if(t==='estar' && !d.cont) return;

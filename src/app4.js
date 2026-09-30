@@ -257,50 +257,66 @@ function stateQuestions(primary, tense, n){
   });
   return out;
 }
-/* императив: fala / não fales · fale / não fale · falem / não falem */
-const IMP_SKIP = new Set(['ser','estar','poder','querer','haver','doer','chover','nevar','saber']);
+/* императив: fala / não fales · fale / não fale · falem / não falem (+ возвратные) */
+const IMP_SKIP = new Set(['ser','poder','querer','haver','doer','chover','nevar','saber','conseguir']);
 const IMP_SPECIAL = {
   ir:  {tu:'vai', stem:'vá', pl:'vão', tuN:'vás'},
   dar: {tu:'dá',  stem:'dê', pl:'deem', tuN:'dês'},
+  estar:{tu:'está', stem:'esteja', pl:'estejam', tuN:'estejas'},
 };
 function impForms(inf){
-  if(inf.endsWith('-se')) return null;               // возвратные — отдельная тема
-  const v = DATA.verbs.find(x=>x.inf===inf);
-  if(!v || v.impersonal || IMP_SKIP.has(inf)) return null;
-  const sp = IMP_SPECIAL[inf];
+  const refl = inf.endsWith('-se');
+  const base = refl ? inf.slice(0,-3) : inf;
+  const v = DATA.verbs.find(x=>x.inf===inf) || DATA.verbs.find(x=>x.inf===base);
+  if(!v || v.impersonal || IMP_SKIP.has(base)) return null;
+  let f;
+  const sp = IMP_SPECIAL[base];
   if(sp){
-    return {tuA:sp.tu, tuN:'não '+sp.tuN, vcA:sp.stem, vcN:'não '+sp.stem,
-            vsA:sp.pl, vsN:'não '+sp.pl};
+    f = {tuA:sp.tu, tuN:'não '+sp.tuN, vcA:sp.stem, vcN:'não '+sp.stem, vsA:sp.pl, vsN:'não '+sp.pl};
+  }else{
+    const vb = DATA.verbs.find(x=>x.inf===base) || v;
+    const eu = (vb.pres[0]||'').replace(/-me$/,'');
+    if(!eu || !eu.endsWith('o')) return null;
+    let stem = eu.slice(0,-1);
+    if(base.endsWith('car')) stem = stem.slice(0,-1)+'qu';
+    else if(base.endsWith('gar')) stem = stem+'u';
+    else if(base.endsWith('çar')) stem = stem.slice(0,-1)+'c';
+    const vw = base.endsWith('ar') ? 'e' : 'a';
+    const tu3 = (vb.pres[2]||'').replace(/-se$/,'');
+    f = {tuA: tu3, tuN: 'não '+stem+vw+'s',
+         vcA: stem+vw, vcN: 'não '+stem+vw,
+         vsA: stem+vw+'m', vsN: 'não '+stem+vw+'m'};
   }
-  const eu = v.pres[0];
-  if(!eu || !eu.endsWith('o')) return null;
-  let stem = eu.slice(0,-1);
-  if(inf.endsWith('car')) stem = stem.slice(0,-1)+'qu';
-  else if(inf.endsWith('gar')) stem = stem+'u';
-  else if(inf.endsWith('çar')) stem = stem.slice(0,-1)+'c';
-  const vw = inf.endsWith('ar') ? 'e' : 'a';
-  return {tuA: v.pres[2], tuN: 'não '+stem+vw+'s',
-          vcA: stem+vw,   vcN: 'não '+stem+vw,
-          vsA: stem+vw+'m', vsN: 'não '+stem+vw+'m'};
+  if(refl){   // levanta-te · não te levantes · levante-se · não se levante · levantem-se
+    f = {
+      tuA: f.tuA+'-te',              tuN: f.tuN.replace(/^não /,'não te '),
+      vcA: f.vcA+'-se',              vcN: f.vcN.replace(/^não /,'não se '),
+      vsA: f.vsA+'-se',              vsN: f.vsN.replace(/^não /,'não se ')
+    };
+  }
+  return f;
 }
 const IMP_CARDS = [
- {k:'tuA', who:'tu',    ru:'приказ на «ты»: сделай!'},
- {k:'tuN', who:'tu',    ru:'запрет на «ты»: не делай!'},
- {k:'vcA', who:'você',  ru:'вежливый приказ: сделайте!'},
- {k:'vcN', who:'você',  ru:'вежливый запрет: не делайте!'},
- {k:'vsA', who:'vocês', ru:'к нескольким: сделайте!'},
- {k:'vsN', who:'vocês', ru:'к нескольким: не делайте!'},
+ {k:'tuA', who:'tu',    person:'tu',    neg:false, ru:'приказ на «ты»: сделай!'},
+ {k:'tuN', who:'tu',    person:'tu',    neg:true,  ru:'запрет на «ты»: не делай!'},
+ {k:'vcA', who:'você',  person:'voce',  neg:false, ru:'вежливый приказ: сделайте!'},
+ {k:'vcN', who:'você',  person:'voce',  neg:true,  ru:'вежливый запрет: не делайте!'},
+ {k:'vsA', who:'vocês', person:'voces', neg:false, ru:'к нескольким: сделайте!'},
+ {k:'vsN', who:'vocês', person:'voces', neg:true,  ru:'к нескольким: не делайте!'},
 ];
-function impQuestions(inf, n){
-  const f = impForms(inf); if(!f) return [];
+function impCard(inf, c){
+  const f = impForms(inf); if(!f || !f[c.k]) return null;
   const v = DATA.verbs.find(x=>x.inf===inf);
-  return shuffle(IMP_CARDS).slice(0, n||6).map(c=>({
+  return {
     label:`${inf} · Imperativo`,
     prompt:`${c.who} — <span style="color:var(--accent)">${inf}</span>`,
     subHtml:`${esc(v.ru)} · <b style="color:var(--warn)">${esc(c.ru)}</b>`,
     answers:[f[c.k], f[c.k].charAt(0).toUpperCase()+f[c.k].slice(1)+'!'],
-    pt:f[c.k], rule:'imperativo', card:true
-  }));
+    pt:f[c.k], rule:'imperativo', card:true, key:c.k
+  };
+}
+function impQuestions(inf, n){
+  return shuffle(IMP_CARDS).slice(0, n||6).map(c=>impCard(inf,c)).filter(Boolean);
 }
 function tensesForDrill(d){
   const v = DATA.verbs.find(x=>x.inf===d.inf);

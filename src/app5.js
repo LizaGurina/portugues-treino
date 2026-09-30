@@ -66,8 +66,8 @@ function conjMenu(){
          <span><b>Случайный неправильный глагол</b><br><span class="small muted">ser, ir, fazer, pôr, dormir…</span></span></button>
        <button class="opt" data-c="pick"><span class="k">3</span>
          <span><b>Выбрать глагол</b><br><span class="small muted">все ${DATA.verbs.filter(v=>!v.impersonal).length} глаголов учебника</span></span></button>
-       <button class="opt" data-c="pps4"><span class="k">4</span>
-         <span><b>⚡ PPS: ser · ir · estar · ter</b><br><span class="small muted">четыре главных неправильных в прошедшем</span></span></button>
+       <button class="opt" data-c="ppsmenu"><span class="k">4</span>
+         <span><b>⏪ Прошедшее PPS</b><br><span class="small muted">ser/ir/estar/ter · правильные · fazer, ver, vir, dizer, trazer</span></span></button>
        <button class="opt" data-c="hear"><span class="k">5</span>
          <span><b>На слух → перевод</b> 🔊<br><span class="small muted">слышишь «estou a ver» — выбираешь «я сейчас смотрю»</span></span></button>
      </div>
@@ -76,7 +76,7 @@ function conjMenu(){
   document.querySelectorAll('[data-c]').forEach(b=> b.onclick = ()=>{
     const c = b.dataset.c;
     if(c==='hear'){ startSession(p=>p.kind==='conjh', 'Спряжения на слух'); return; }
-    if(c==='pps4'){ startPps4(); return; }
+    if(c==='ppsmenu'){ ppsMenu(); return; }
     if(c==='pick'){ verbPick(); return; }
     const pool = DATA.verbs.filter(v=> !v.impersonal && !!v.irr === (c==='irr'));
     verbSections(drillFor(rnd(pool).inf));
@@ -169,13 +169,13 @@ function verbSections(d){
          <span><b>Императив · fala / não fales</b><br>
          <span class="small muted">${impForms(d.inf)?'приказ и запрет: tu · você · vocês':'для этого глагола не тренируем'}</span></span></button>
        <button class="opt" data-s="pps4"><span class="k">5</span>
-         <span><b>⚡ PPS: ser · ir · estar · ter</b><br><span class="small muted">отдельная разминка, не зависит от глагола</span></span></button>
+         <span><b>⏪ PPS: неправильные глаголы</b><br><span class="small muted">ser/ir/estar/ter и fazer, ver, vir, dizer, trazer</span></span></button>
      </div>
    </div>`;
   document.getElementById('back').onclick = conjMenu;
   document.querySelectorAll('[data-s]').forEach(b=> b.onclick = ()=>{
     const m = b.dataset.s;
-    if(m==='pps4'){ startPps4(); return; }
+    if(m==='pps4'){ ppsMenu(); return; }
     if(m==='imp'){ if(impForms(d.inf)) startImpSession(impQuestions(d.inf, 6), d.inf+' · Императив'); return; }
     if(m==='pps' && !hasPps) return;
     startVerbSection(d, m);
@@ -359,11 +359,74 @@ function qwMenu(){
 
 /* ================= ИМПЕРАТИВ ================= */
 function impMenu(){
-  const verbs = DATA.verbs.filter(v=>impForms(v.inf)).map(v=>v.inf);
-  const qs = [];
-  shuffle(verbs).slice(0,5).forEach(inf=> qs.push(...impQuestions(inf, 4)));
-  startImpSession(shuffle(qs).slice(0,20), '❗ Императив · случайные глаголы');
+  buildPool();
+  const all = POOL.filter(p=>p.kind==='imp');
+  const verbs = [...new Set(all.map(p=>p.inf))];
+  const cnt = f => all.filter(f).length;
+  document.getElementById('view').innerHTML = `
+   <div class="row" style="margin-bottom:14px"><button class="btn ghost" id="back">← назад</button></div>
+   <div class="card"><h2>❗ Императив · ${verbs.length} глаголов</h2>
+     <p class="small muted" style="margin-top:-6px">fala · não fales · fale · não fale · falem · não falem</p>
+     <div class="opts">
+       <button class="opt" data-i="all"><span class="k">1</span>
+         <span><b>Все формы вперемешку</b><br><span class="small muted">${all.length} карточек</span></span></button>
+       <button class="opt" data-i="tu"><span class="k">2</span>
+         <span><b>Только «ты» · tu</b><br><span class="small muted">fala / não fales · ${cnt(p=>p.person==='tu')}</span></span></button>
+       <button class="opt" data-i="voce"><span class="k">3</span>
+         <span><b>Вежливое · você</b><br><span class="small muted">fale / não fale · ${cnt(p=>p.person==='voce')}</span></span></button>
+       <button class="opt" data-i="voces"><span class="k">4</span>
+         <span><b>К нескольким · vocês</b><br><span class="small muted">falem / não falem · ${cnt(p=>p.person==='voces')}</span></span></button>
+       <button class="opt" data-i="pos"><span class="k">5</span>
+         <span><b>Только приказы</b><br><span class="small muted">без «não» · ${cnt(p=>!p.neg)}</span></span></button>
+       <button class="opt" data-i="neg"><span class="k">6</span>
+         <span><b>Только запреты</b><br><span class="small muted">не делай / не делайте · ${cnt(p=>p.neg)}</span></span></button>
+       <button class="opt" data-i="pick"><span class="k">7</span>
+         <span><b>Выбрать глагол</b><br><span class="small muted">все 6 форм одного глагола</span></span></button>
+     </div>
+   </div>`;
+  document.getElementById('back').onclick = home;
+  document.querySelectorAll('[data-i]').forEach(b=> b.onclick = ()=>{
+    const k = b.dataset.i;
+    if(k==='pick'){ impVerbPick(); return; }
+    const f = k==='all' ? (p=>p.kind==='imp')
+      : k==='pos' ? (p=>p.kind==='imp' && !p.neg)
+      : k==='neg' ? (p=>p.kind==='imp' && p.neg)
+      : (p=>p.kind==='imp' && p.person===k);
+    const t = {all:'Императив', tu:'Императив · tu', voce:'Императив · você',
+               voces:'Императив · vocês', pos:'Императив · приказы', neg:'Императив · запреты'}[k];
+    startSession(f, '❗ '+t);
+  });
 }
+
+function impVerbPick(){
+  buildPool();
+  const verbs = [...new Set(POOL.filter(p=>p.kind==='imp').map(p=>p.inf))].sort();
+  const card = inf => { const v = DATA.verbs.find(x=>x.inf===inf);
+    return `<button class="mode" data-inf="${inf}"><div class="t">${inf}</div>
+            <div class="d">${esc((v&&v.ru)||'')}</div></button>`; };
+  document.getElementById('view').innerHTML = `
+   <div class="row" style="margin-bottom:14px"><button class="btn ghost" id="back">← назад</button></div>
+   <div class="card"><h2>Императив: выберите глагол · ${verbs.length}</h2>
+     <input class="answer" id="iSearch" placeholder="поиск: fechar, закрыть…" style="margin-top:0"
+       autocomplete="off" autocapitalize="off" spellcheck="false">
+     <div class="grid" id="iGrid" style="grid-template-columns:repeat(auto-fit,minmax(130px,1fr));margin-top:12px">
+       ${verbs.map(card).join('')}</div>
+   </div>`;
+  document.getElementById('back').onclick = impMenu;
+  const bind = ()=> document.querySelectorAll('#iGrid [data-inf]').forEach(b=>
+    b.onclick = ()=> startImpSession(impQuestions(b.dataset.inf, 6), b.dataset.inf+' · Императив'));
+  bind();
+  document.getElementById('iSearch').oninput = e=>{
+    const q = strip(e.target.value.toLowerCase().trim());
+    const sel = verbs.filter(inf=>{
+      const v = DATA.verbs.find(x=>x.inf===inf);
+      return !q || strip(inf).includes(q) || strip(((v&&v.ru)||'').toLowerCase()).includes(q);
+    });
+    document.getElementById('iGrid').innerHTML = sel.map(card).join('');
+    bind();
+  };
+}
+
 function startImpSession(qsteps, title){
   SES = {queue: qsteps.map((s,i)=>{ const q = ({
       id:'imp-'+i+'-'+s.pt, p:{id:'imp-'+s.pt, kind:'conj', unit:6, group:'conj'},
@@ -438,4 +501,60 @@ function grammarMenu(){
     const g = GRAM_GROUPS.find(x=>x.key===k);
     startSession(p=> isGram(p) && g.rules.includes(p.rule), g.icon+' '+g.ru);
   });
+}
+
+/* ================= PPS: три группы ================= */
+const PPS_IRR2 = ['fazer','ver','vir','dizer','trazer'];
+const PPS_CORE = ['ser','ir','estar','ter'];
+function ppsMenu(){
+  buildPool();
+  const regs = DATA.verbs.filter(v=>v.pps && !v.irr && !v.impersonal).length;
+  document.getElementById('view').innerHTML = `
+   <div class="row" style="margin-bottom:14px"><button class="btn ghost" id="back">← назад</button></div>
+   <div class="card"><h2>⏪ Pretérito Perfeito Simples</h2>
+     <div class="opts">
+       <button class="opt" data-p="core"><span class="k">1</span>
+         <span><b>ser · ir · estar · ter</b><br><span class="small muted">фразами: fui, estive, tive…</span></span></button>
+       <button class="opt" data-p="reg"><span class="k">2</span>
+         <span><b>Regulares</b><br><span class="small muted">-ei/-aste/-ou · -i/-este/-eu · ${regs} глаголов</span></span></button>
+       <button class="opt" data-p="irr"><span class="k">3</span>
+         <span><b>Irregulares</b><br><span class="small muted">fazer · ver · vir · dizer · trazer</span></span></button>
+       <button class="opt" data-p="mix"><span class="k">4</span>
+         <span><b>Всё вперемешку</b><br><span class="small muted">выбрать нужную форму по смыслу</span></span></button>
+     </div>
+   </div>`;
+  document.getElementById('back').onclick = conjMenu;
+  document.querySelectorAll('[data-p]').forEach(b=> b.onclick = ()=>{
+    const k = b.dataset.p;
+    if(k==='core'){ startPps4(); return; }
+    const list = k==='irr' ? PPS_IRR2
+      : k==='reg' ? DATA.verbs.filter(v=>v.pps && !v.irr && !v.impersonal).map(v=>v.inf)
+      : DATA.verbs.filter(v=>v.pps && !v.impersonal).map(v=>v.inf);
+    startPpsCards(list, k==='irr' ? '⏪ PPS irregulares' : k==='reg' ? '⏪ PPS regulares' : '⏪ PPS вперемешку');
+  });
+}
+/* карточки «лицо + глагол → форма PPS» */
+function startPpsCards(infs, title){
+  const SUBJ_LC = ['я','ты','она','мы','они'];
+  const qs = [];
+  shuffle(infs).slice(0, 12).forEach(inf=>{
+    const v = DATA.verbs.find(x=>x.inf===inf); if(!v || !v.pps) return;
+    const ps = shuffle([0,1,2,3,4]).slice(0, infs.length<8 ? 3 : 2);
+    ps.forEach(p=>{
+      const form = v.pps[p]; if(!form) return;
+      const answers = [form];
+      PERSONS[p].split(', ').forEach(pr=> answers.push(pr+' '+form));
+      const q = {
+        id:'ppsc-'+inf+'-'+p, p:{id:'ppsc-'+inf+'-'+p, kind:'conj', unit:8, group:'conj'},
+        type:'input', label:TENSES.pps.name, hintLabel: inf+' · PPS',
+        prompt:`${PERSONS[p]} — <span style="color:var(--accent)">${inf}</span>`,
+        subHtml:`${esc(v.ru)} · <b style="color:var(--warn)">простое прошедшее — вчера ${SUBJ_LC[p]}…</b>`,
+        answers, speakAfter:form, rule: v.irr?'pps_irregulares':'pps_regulares',
+        conj:{v, tense:'pps', person:p}
+      };
+      q.p._pre = q; qs.push(q);
+    });
+  });
+  SES = {queue: shuffle(qs).slice(0,20), i:0, right:0, wrong:0, again:[], log:[], title};
+  renderSession();
 }
