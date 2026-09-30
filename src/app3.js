@@ -80,6 +80,8 @@ function home(){
         <div class="d">сравнение · tão/tanto · há…que/desde · alguém/ninguém · é que</div></button>
       <button class="mode" id="toNums"><div class="t">🔢 Числа и часы</div>
         <div class="d">до 1000, словами и на слух · que horas são?</div></button>
+      <button class="mode" id="toAtlas"><div class="t">📔 Словарь по темам</div>
+        <div class="d">613 слов: тело, дом, кухня, город, спорт, погода…</div></button>
       <button class="mode" id="toLexis"><div class="t">📚 Лексика по темам</div>
         <div class="d">${DATA.vocab.length} слов · ${DATA.themes.length} тем · антонимы</div></button>
       <button class="mode" data-f="weak"><div class="t">Работа над ошибками</div>
@@ -124,6 +126,7 @@ function home(){
   document.getElementById('lsDlg').onclick = ()=>{ S.hist['done-dlg']=today(); save(); startDialog(dlg); };
   document.getElementById('allDlg').onclick = dialogsList;
   document.getElementById('toLexis').onclick = lexisList;
+  document.getElementById('toAtlas').onclick = atlasMenu;
   document.getElementById('toNums').onclick = numbersMenu;
   document.getElementById('toComplex').onclick = complexMenu;
   document.getElementById('toQw').onclick = qwMenu;

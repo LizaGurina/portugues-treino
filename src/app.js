@@ -160,6 +160,10 @@ function buildPool(){
     if(w.art) POOL.push({id:'g'+i, kind:'gender', pt:w.pt, ru:w.ru, art:w.art, unit:w.unit,
                          theme:w.theme, group:'rules', rule:'artigos', artCard:true});
   });
+  DATA.vocab2.forEach((w,i)=>{
+    POOL.push({id:'v2-'+i, kind:'vocab', atlas:true, pt:w.pt, ru:w.ru, art:w.art,
+               unit:9, theme:w.theme, group:'vocab'});
+  });
   // спряжения
   DATA.verbs.forEach((v,i)=>{
     ['pres','estar','ir','pps'].forEach(t=>{
@@ -207,7 +211,7 @@ function buildPool(){
   DATA.trans.forEach((x,i)=>POOL.push({id:'t'+i, kind:'trans', i, unit:x.unit, rule:x.rule, group:'trans'}));
   // числа/часы/антонимы — сквозные, не зависят от выбранных юнитов
   const CROSS = new Set(['numw','numh','horaw','horah','anto']);
-  POOL = POOL.filter(p => CROSS.has(p.kind) || S.set.units.includes(p.unit));
+  POOL = POOL.filter(p => p.atlas || CROSS.has(p.kind) || S.set.units.includes(p.unit));
 }
 
 /* ---------- подбор сессии ---------- */
@@ -247,6 +251,7 @@ function pickSession(n, filter){
 function themeOfDay(){
   return DATA.themes[(dayNum(today()) + (S.lessonOffset||0)) % DATA.themes.length];
 }
+function atlasPool(key){ return POOL.filter(p=>p.atlas && p.theme===key); }
 function themePool(th){
   const keys = new Set(th.vt);
   return POOL.filter(p => (p.kind==='vocab' && p.theme && keys.has(p.theme)) ||

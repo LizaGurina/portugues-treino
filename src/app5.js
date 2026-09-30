@@ -558,3 +558,74 @@ function startPpsCards(infs, title){
   SES = {queue: shuffle(qs).slice(0,20), i:0, right:0, wrong:0, again:[], log:[], title};
   renderSession();
 }
+
+/* ================= СЛОВАРЬ В КАРТИНКАХ (613 слов) ================= */
+function atlasMenu(){
+  buildPool();
+  document.getElementById('view').innerHTML = `
+   <div class="row" style="margin-bottom:14px"><button class="btn ghost" id="back">← назад</button></div>
+   <div class="card"><h2>📔 Словарь по темам</h2>
+     <p class="small muted" style="margin-top:-6px">${DATA.vocab2.length} слов · узнавание и диктовка</p>
+     <input class="answer" id="aSearch" placeholder="поиск темы или слова…" style="margin-top:4px"
+       autocomplete="off" autocapitalize="off" spellcheck="false">
+     <div class="grid" id="aGrid" style="grid-template-columns:repeat(auto-fit,minmax(150px,1fr));margin-top:12px">
+     </div>
+   </div>`;
+  document.getElementById('back').onclick = home;
+  const render = (q)=>{
+    const qq = strip((q||'').toLowerCase().trim());
+    const themes = DATA.themes2.filter(t=>{
+      if(!qq) return true;
+      if(strip(t.ru.toLowerCase()).includes(qq)) return true;
+      return DATA.vocab2.some(w=>w.theme===t.key &&
+        (strip(w.pt.toLowerCase()).includes(qq) || strip(w.ru.toLowerCase()).includes(qq)));
+    });
+    document.getElementById('aGrid').innerHTML = themes.map(t=>{
+      const pool = atlasPool(t.key);
+      const learned = pool.filter(p=>S.items[p.id] && S.items[p.id].b>=3).length;
+      const pct = pool.length? Math.round(learned/pool.length*100):0;
+      return `<button class="mode" data-at="${t.key}">
+        <div class="t">${t.icon} ${esc(t.ru)}</div>
+        <div class="d">${pool.length} слов · освоено ${pct}%</div>
+        <div class="mini" style="width:100%;margin-top:7px"><i style="width:${pct}%"></i></div>
+      </button>`;}).join('') ||
+      '<div class="small muted">Ничего не найдено</div>';
+    document.querySelectorAll('[data-at]').forEach(b=> b.onclick = ()=> atlasTheme(b.dataset.at));
+  };
+  render('');
+  document.getElementById('aSearch').oninput = e=> render(e.target.value);
+}
+function atlasTheme(key){
+  const t = DATA.themes2.find(x=>x.key===key);
+  document.getElementById('view').innerHTML = `
+   <div class="row" style="margin-bottom:14px"><button class="btn ghost" id="back">← к темам</button></div>
+   <div class="card"><h2>${t.icon} ${esc(t.ru)}</h2>
+     <div class="opts">
+       <button class="opt" data-am="rec"><span class="k">1</span>
+         <span><b>Узнавать слова · PT → RU</b><br><span class="small muted">слышишь и видишь слово → выбираешь перевод</span></span></button>
+       <button class="opt" data-am="prod"><span class="k">2</span>
+         <span><b>Диктовать слова · RU → PT</b><br><span class="small muted">русское слово → говоришь в микрофон или пишешь</span></span></button>
+       <button class="opt" data-am="mix"><span class="k">3</span>
+         <span><b>Смешанный</b><br><span class="small muted">новое — узнавание, знакомое — диктовка</span></span></button>
+     </div>
+     <button class="btn ghost wide" id="listWords" style="margin-top:12px">📄 Показать все слова темы</button>
+   </div>`;
+  document.getElementById('back').onclick = atlasMenu;
+  document.querySelectorAll('[data-am]').forEach(b=> b.onclick = ()=>{
+    buildPool();
+    const ids = new Set(atlasPool(key).map(p=>p.id));
+    startSession(p=>ids.has(p.id), t.icon+' '+t.ru, b.dataset.am==='mix'? null : b.dataset.am);
+  });
+  document.getElementById('listWords').onclick = ()=>{
+    const ws = DATA.vocab2.filter(w=>w.theme===key);
+    document.getElementById('view').innerHTML = `
+     <div class="row" style="margin-bottom:14px"><button class="btn ghost" id="back2">← назад</button></div>
+     <div class="card"><h2>${t.icon} ${esc(t.ru)} · ${ws.length}</h2>
+       ${ws.map(w=>`<div class="statline">
+         <span><b>${w.art? w.art+' ':''}${esc(w.pt)}</b> — ${esc(w.ru)}</span>
+         <button class="speak" data-s="${esc(w.pt)}">🔊</button></div>`).join('')}
+     </div>`;
+    document.getElementById('back2').onclick = ()=> atlasTheme(key);
+    document.querySelectorAll('.speak[data-s]').forEach(b=> b.onclick = ()=> say(b.dataset.s));
+  };
+}

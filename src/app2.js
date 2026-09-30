@@ -6,6 +6,7 @@ function makeQ(p){ if(p._pre) return p._pre;
     const box = m ? m.b : 0;
     // режим: rec (PT→RU выбор) · recpt (RU→PT выбор) · prod (ввод) · null = смешанный по коробке
     let mode = (SES && SES.mode) || (box>=2 ? 'prod' : (box>=1 ? 'recpt' : 'rec'));
+    if(p.atlas && mode==='recpt') mode = (box>=1 ? 'prod' : 'rec');   // словарь: только узнавание и ввод
     if(mode==='prod'){
       q.type='input'; q.label='Напишите слово по-португальски';
       q.prompt=p.ru; q.answers=[p.pt, (p.art? p.art+' '+p.pt : p.pt)];
@@ -21,8 +22,9 @@ function makeQ(p){ if(p._pre) return p._pre;
     }else{
       q.type='choice'; q.label='Что это значит?'; q.prompt=(p.art? p.art+' ':'')+p.pt;
       q.speakNow=p.pt;
-      const others = shuffle(DATA.vocab.filter(w=>w.theme===p.theme && w.ru!==p.ru)).slice(0,3);
-      while(others.length<3){ const c=rnd(DATA.vocab); if(c.ru!==p.ru && !others.includes(c)) others.push(c); }
+      const src = p.atlas ? DATA.vocab2 : DATA.vocab;
+      const others = shuffle(src.filter(w=>w.theme===p.theme && w.ru!==p.ru)).slice(0,3);
+      while(others.length<3){ const c=rnd(src); if(c.ru!==p.ru && !others.includes(c)) others.push(c); }
       q.options = shuffle([p.ru, ...others.map(o=>o.ru)]); q.correct=p.ru;
     }
   }

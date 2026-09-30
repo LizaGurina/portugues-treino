@@ -5,7 +5,7 @@ import json, os, re, sys
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, os.path.join(HERE, 'src'))
 
-import verbs as V, vocab as VO, rules as R, items_gap as IG, items_trans as IT, lessons as L, stories as ST, dialogs as DG, themes as TH, items_complex as CX, items_questions as QW
+import verbs as V, vocab as VO, vocab2 as VO2, rules as R, items_gap as IG, items_trans as IT, lessons as L, stories as ST, dialogs as DG, themes as TH, items_complex as CX, items_questions as QW
 
 UNIT_NAMES = ["Olá! Eu sou a Ana.", "A tua amiga é muito simpática!", "Vamos almoçar?",
               "A vossa casa fica longe?", "Como vai estar o tempo?", "Estás melhor?",
@@ -51,6 +51,8 @@ def build_data():
         "cxGroups": [{"key": k, "ru": ru, "d": d} for k, ru, d in CX.GROUPS],
         "qw": [{"g": g, "ru": ru, "pt": pt, "alts": alts} for g, ru, pt, alts in QW.QW],
         "qwGroups": [{"key": k, "ru": ru, "d": d} for k, ru, d in QW.QW_GROUPS],
+        "vocab2": [{"pt": pt, "art": art, "ru": ru, "theme": t} for pt, art, ru, t in VO2.VOCAB2],
+        "themes2": [{"key": k, "ru": ru, "icon": ic} for k, ru, ic in VO2.THEMES2],
     }
     for r, ru, pt, alts, u in IT.TRANS:
         alts = list(alts)
