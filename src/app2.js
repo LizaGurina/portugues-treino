@@ -189,10 +189,13 @@ function renderSession(){
     if(q.note) body += `<div class="small muted" style="margin-top:8px">💡 ${esc(q.note)}</div>`;
     body += `<div class="row" style="margin-top:14px"><button class="btn" id="go">Проверить</button>
              <button class="btn ghost" id="skip">Не знаю</button>
-             <button class="btn ghost" id="dict" title="Продиктовать (pt-PT)">🎤</button></div>`;
+             <button class="btn ghost" id="dict" title="Продиктовать (pt-PT)">🎤</button>
+             ${q.p.kind==='vocab' ? `<button class="btn ghost" id="knowIt" title="Больше не показывать часто">✓ знаю</button>`:''}</div>`;
   }else{
     body += `<div class="opts">` + q.options.map((o,i)=>
       `<button class="opt" data-o="${esc(o)}"><span class="k">${i+1}</span>${esc(o)}</button>`).join('') + `</div>`;
+    if(q.p.kind==='vocab') body += `<div class="row" style="margin-top:12px">
+      <button class="btn ghost" id="knowIt" title="Больше не показывать часто">✓ знаю это слово</button></div>`;
   }
   const dots = SES.queue.map((_,i)=>`<i class="${SES.log[i]===1?'done':SES.log[i]===2?'fixed':SES.log[i]===0?'bad':''}"></i>`).join('');
   v.innerHTML = `
@@ -209,6 +212,14 @@ function renderSession(){
     </div>`;
   document.getElementById('quit').onclick = ()=>{ SES=null; save(); home(); };
   const sp = document.getElementById('sp'); if(sp) sp.onclick = ()=> say(q.speakNow||q.speakAfter);
+  const ki = document.getElementById('knowIt');
+  if(ki) ki.onclick = ()=>{
+    const d = new Date(); d.setDate(d.getDate()+35);
+    S.items[q.id] = {b:5, due:d.toISOString().slice(0,10), r:1, w:0, seen:today()};
+    SES.log[SES.i] = 1; SES.right++;
+    const dd = today(); S.hist[dd] = S.hist[dd]||{n:0,ok:0}; S.hist[dd].n++; S.hist[dd].ok++;
+    save(); SES.i++; document.onkeydown=null; renderSession();
+  };
   const lh = document.getElementById('lblHint');
   if(lh) lh.onclick = ()=>{ lh.outerHTML = `<span style="color:var(--accent);font-weight:600">${esc(q.hintLabel)}</span>`; };
   if(q.speakNow) setTimeout(()=>say(q.speakNow), 250);

@@ -618,14 +618,41 @@ function atlasTheme(key){
   });
   document.getElementById('listWords').onclick = ()=>{
     const ws = DATA.vocab2.filter(w=>w.theme===key);
-    document.getElementById('view').innerHTML = `
-     <div class="row" style="margin-bottom:14px"><button class="btn ghost" id="back2">← назад</button></div>
-     <div class="card"><h2>${t.icon} ${esc(t.ru)} · ${ws.length}</h2>
-       ${ws.map(w=>`<div class="statline">
+    buildPool();
+    const idOf = w => (POOL.find(p=>p.atlas && p.pt===w.pt && p.theme===key)||{}).id;
+    const known = w => { const m = S.items[idOf(w)]; return m && m.b>=4; };
+    const row = w => `<div class="statline" data-w="${esc(w.pt)}">
          <span><b>${w.art? w.art+' ':''}${esc(w.pt)}</b> — ${esc(w.ru)}</span>
-         <button class="speak" data-s="${esc(w.pt)}">🔊</button></div>`).join('')}
-     </div>`;
-    document.getElementById('back2').onclick = ()=> atlasTheme(key);
-    document.querySelectorAll('.speak[data-s]').forEach(b=> b.onclick = ()=> say(b.dataset.s));
+         <button class="speak" data-s="${esc(w.pt)}">🔊</button>
+         <button class="btn ghost know ${known(w)?'on':''}" data-k="${esc(w.pt)}"
+           style="padding:4px 10px;font-size:12px;${known(w)?'border-color:var(--accent);color:var(--accent)':''}">
+           ${known(w)?'✓ знаю':'знаю'}</button></div>`;
+    const draw = ()=>{
+      document.getElementById('view').innerHTML = `
+       <div class="row" style="margin-bottom:14px">
+         <button class="btn ghost" id="back2">← назад</button>
+         <button class="btn ghost" id="knowAll">✓ знаю всю тему</button></div>
+       <div class="card"><h2>${t.icon} ${esc(t.ru)} · ${ws.length}</h2>
+         <p class="small muted" style="margin-top:-6px">отмеченные «знаю» уходят в редкое повторение (через 35 дней)</p>
+         ${ws.map(row).join('')}
+       </div>`;
+      document.getElementById('back2').onclick = ()=> atlasTheme(key);
+      document.querySelectorAll('.speak[data-s]').forEach(b=> b.onclick = ()=> say(b.dataset.s));
+      document.querySelectorAll('[data-k]').forEach(b=> b.onclick = ()=>{
+        const w = ws.find(x=>x.pt===b.dataset.k); const id = idOf(w); if(!id) return;
+        const m = S.items[id];
+        if(m && m.b>=4){ delete S.items[id]; }        // снять отметку
+        else { const d=new Date(); d.setDate(d.getDate()+35);
+               S.items[id] = {b:5, due:d.toISOString().slice(0,10), r:1, w:0, seen:today()}; }
+        save(); draw();
+      });
+      document.getElementById('knowAll').onclick = ()=>{
+        if(!confirm('Отметить все '+ws.length+' слов темы как знакомые?')) return;
+        const d=new Date(); d.setDate(d.getDate()+35);
+        ws.forEach(w=>{ const id=idOf(w); if(id) S.items[id]={b:5, due:d.toISOString().slice(0,10), r:1, w:0, seen:today()}; });
+        save(); draw();
+      };
+    };
+    draw();
   };
 }
